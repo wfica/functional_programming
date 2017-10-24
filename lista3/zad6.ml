@@ -92,3 +92,12 @@ let solve () =
   List.filter ~f:( fun (a, b) -> filter4 @@ a*b) |>
   List.filter ~f:( fun (a, b) -> filter5 @@ a+b) 
 ;;
+
+
+let test () =
+  try 
+    assert ( solve () = [(4,13)] ) ;
+    true;
+  with 
+  | _ -> false;
+;;

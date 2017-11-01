@@ -1,4 +1,4 @@
-OCB_FLAGS = -use-ocamlfind -I lista3
+OCB_FLAGS = -use-ocamlfind -I lista
 OCB = ocamlbuild $(OCB_FLAGS)
 
 OCB_FLAGS_WITH_CORE = -tag-line 'true:package(core,ppx_jane,core_bench)' -tags thread,debug $(OCB_FLAGS)
@@ -34,7 +34,7 @@ test:
 	echo '#require "qcheck";;' >> .ocamlinit_tmp
 	echo '#camlp4o;;' >> .ocamlinit_tmp
 	echo '#thread;;' >> .ocamlinit_tmp
-	echo '#directory "_build/lista3";;' >> .ocamlinit_tmp
+	echo '#directory "_build/lista";;' >> .ocamlinit_tmp
 	echo '#load_rec "$<";;' >> .ocamlinit_tmp
 	clear
 	utop -init .ocamlinit_tmp

@@ -1,6 +1,8 @@
 S src/**
+S lista4/**
 
 B _build/src/**
+B _build/lista4/**
 
 B common
 PKG core

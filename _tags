@@ -1,0 +1,6 @@
+<**/src/**>: include
+<**/lista/**>: include
+
+true: package(core,ppx_jane,core_bench)
+true: thread,debug
+true: bin_annot

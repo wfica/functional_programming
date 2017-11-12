@@ -1,8 +1,7 @@
-OCB_FLAGS = -use-ocamlfind -I lista
-OCB = ocamlbuild $(OCB_FLAGS)
+OCAMLINIT_PATH = "/home/fica/.ocamlinit"
 
-OCB_FLAGS_WITH_CORE = -tag-line 'true:package(core,ppx_jane,core_bench)' -tags thread,debug $(OCB_FLAGS)
-OCB_CORE = ocamlbuild $(OCB_FLAGS_WITH_CORE)
+OCB_FLAGS = -use-ocamlfind -no-hygiene
+OCB = ocamlbuild $(OCB_FLAGS)
 
 
 clean: 
@@ -10,7 +9,7 @@ clean:
 	rm -f .ocamlinit_tmp
 
 benchmarks_msorts:
-	$(OCB_CORE) benchmarks_msorts.native
+	$(OCB) benchmarks_msorts.native
 	./benchmarks_msorts.native
 
 test:
@@ -18,25 +17,20 @@ test:
 	./test.native
 
 %.native:
-	$(OCB_CORE) $@
+	$(OCB) $@
 
 %.byte:
-	$(OCB_CORE) $@
+	$(OCB) $@
 
 %.cmo:
-	$(OCB_CORE) $@
+	$(OCB) $@
 
 %.top: %.cmo
-	echo '#use "topfind";;' > .ocamlinit_tmp
-	echo '#require "core.top";;' >> .ocamlinit_tmp
-	echo '#require "core.syntax";;' >> .ocamlinit_tmp
-	echo '#require "core_bench";;' >> .ocamlinit_tmp
-	echo '#require "qcheck";;' >> .ocamlinit_tmp
-	echo '#camlp4o;;' >> .ocamlinit_tmp
-	echo '#thread;;' >> .ocamlinit_tmp
-	echo '#directory "_build/lista";;' >> .ocamlinit_tmp
+	cat $(OCAMLINIT_PATH) > .ocamlinit_tmp
+	for file in $(shell find ./_build -type d); do \
+		echo "#directory \"$$file\";;" >> .ocamlinit_tmp;\
+	done
 	echo '#load_rec "$<";;' >> .ocamlinit_tmp
-	clear
 	utop -init .ocamlinit_tmp
 
 

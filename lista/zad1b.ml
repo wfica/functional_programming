@@ -1,13 +1,6 @@
 open Core.Std;;
+open Llist;;
 
-
-let sgn_float x = if x >= 0. then 1. else -1.
-;;
-
-let next_leibniz k = 
-  let sgn = sgn_float k in
-  -1. *. sgn /. (sgn /. k +. 2.)
-;;
 
 let rec leibniz_from k = LC(k,  lazy (leibniz_from (next_leibniz k) ) )
 ;;

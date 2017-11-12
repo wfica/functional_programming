@@ -1,29 +1,11 @@
 open Core.Std;;
 open Llist;;
 
-
 let rec leibniz_from k = LC(k,  lazy (leibniz_from (next_leibniz k) ) )
 ;;
 
 let leibniz_approx = sum_pref_stream  (leibniz_from 1.) 
 ;;
-
-let rec ltake ll n =
-  match ll, n with
-  | LNil, _ -> []
-  | _, 0 -> []
-  | LC(hd, lazy tl), _ -> hd :: ltake tl (n-1) 
-;;
-
-let rec ltake_with_tail ll n =
-  match ll, n with
-  | LNil, _ -> ([], LNil)
-  | xs, 0  -> ([], xs)
-  | LC(hd, lazy tail), _ -> 
-    let (l, tl) = ltake_with_tail tail  (n-1)
-    in (hd::l, tl)
-;;
-
 
 let transform_stream ll f =
   let rec _transform ll f =
@@ -33,7 +15,6 @@ let transform_stream ll f =
   in
   _transform ll (fun [a; b; c] -> f a b c )
 ;;
-
 
 let euler_transform x y z = z -. (y -. z) *. (y -. z) /. (x -. 2. *. y +. z);;
 
@@ -48,4 +29,3 @@ let test () =
     List.map ~f:(fun i -> List.nth_exn approx2 i -. pi_4 ) args ]
 
 ;;
-

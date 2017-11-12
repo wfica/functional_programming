@@ -51,7 +51,7 @@ exception Zero;;
 let rec prod_cps_exn tree = fun k -> 
   match tree with
   | Leaf -> k 1
-  | Node(_, 0, _) -> raise Zero
+  | Node(_, 0, _) -> 0
   | Node(left, v, right) -> 
     prod_cps left @@
     fun left_prod -> prod_cps right @@

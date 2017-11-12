@@ -139,6 +139,7 @@ let test_tree () =
 		assert ( tree_of_place @@  up @@ left @@ create_place_tree t3  = t3 );
 		assert ( tree_of_place @@  up @@ up @@ left @@ left @@ create_place_tree t4  = t4 );
 		assert ( tree_of_place @@  up @@ up @@ right @@ left @@ create_place_tree t4  = t4 );
+		assert (up @@ right @@ left @@ create_place_tree t4  = up @@ left @@ right @@ create_place_tree t4  );
 		true
 	with
 	_ -> false

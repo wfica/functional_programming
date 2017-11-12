@@ -1,127 +1,41 @@
 (*
-Zadanie 2 (3p.)
+Zadanie 2 (8p.)
 
-Napisz możliwie efektywne funkcje przejścia wszerz oraz przejścia w głąb 
-(w porządku preorder) dla obu reprezentacji drzew wielokierunkowych podanych 
-na wykładzie (zadanie 5 z listy kontrolnej do wykładu 4). Funkcje powinny 
-zwracać listę wartości znalezionych w drzewie w kolejności odwiedzania jego 
-wierzchołków.
+Mamy ciąg szklanek o znanych pojemnościach, a także kran i zlew. W każdym ruchu możemy 
+wykonać jedną z trzech czynności:
+
+	napełnić jedną ze szklanek wodą z kranu (FILL),
+	opróżnić jedną ze szklanek do zlewu (DRAIN),
+	przelać wodę z jednej ze szklanek do innej (TRANSFER).
+	
+Stan takiego układu szklanek możemy zapisać przy użyciu dwóch list reprezentujących 
+odpowiednio pojemności szklanek i ilość wody znajdującą się w każdej z nich. Przykładowo, 
+para ([4; 9], [4; 6]) oznacza że dysponujemy dwiema szklankami o pojemnościach 4 i 9, oraz że 
+pierwsza z nich jest pełna, zaś w drugiej znajduje się 6 jednostek wody. W takim przypadku 
+efekty poniższych ruchów następująco zmieniają tę zawartość szklanek (czyli drugą z 
+powyższych list; zwróć uwagę że można napełnić pełną szklankę):
+
+	FILL 1 → [4; 9]
+	FILL 0 → [4; 6]
+	DRAIN 0 → [0; 6]
+	TRANSFER (0, 1) → [1; 9].
+	
+Dla danego zestawu szklanek i danej objętości wody, rozwiązaniem nazywamy ciąg ruchów, który 
+prowadzi do uzyskania w dowolnej ze szklanek zadanej objętości wody. Przykładowo, dla szklanek 
+[4, 9] i objętości 5, rozwiązaniem jest ciąg [FILL 1, TRANSFER (1, 0)] (a także wiele innych, 
+redundantnych ciągów).
+
+Użyj leniwych list aby zdefiniować funkcję nsols : (int list * int) -> int -> move list list, 
+taką że nsols (glasses, volume) n zwróci listę n najkrótszych rozwiązań problemu zadanego 
+przez glasses i volume (typ danych move powinien reprezentować pojedynczy ruch). W przypadku gdy 
+rozwiązanie nie istnieje, program może się zapętlić.
+
+Wskazówka: 
+Ponieważ dopuszczamy redundantne ciągi (np. przelewanie z pustego w próżne), a 
+także możemy się zapętlić gdy rozwiązanie nie istnieje, nie potrzeba sprawdzać czy daną 
+konfigurację można osiągnąć w inny (potencjalnie lepszy) sposób.
+
+Uwaga: 
+Dzięki użyciu leniwych list, możliwa jest implementacja, w której w programie let f = 
+nsols (g, v) in (f n; f n) drugie wywołanie f n działa w czasie O(n).
 *)
-
-open Core.Std;;
-
-type 'a mtree = MNode of 'a * 'a forest
-and 'a forest = EmptyForest | Forest of 'a mtree * 'a forest;;
-
-let list_of_forest forest = 
-  let rec f2l forest acc =
-    match forest with
-    | EmptyForest -> List.rev acc
-    | Forest(tree, f) -> f2l f (tree::acc)
-  in
-  f2l forest []
-;;
-
-
-let dfs1 tree =
-  let rec _dfs visited stack =
-    match stack with
-    | [] -> List.rev visited
-    | MNode(v, childern)::tl -> _dfs (v::visited) ( list_of_forest childern @ tl)
-  in _dfs [] [tree]
-;;
-
-let bfs1 tree =
-  let rec _bfs visited queue =
-    match queue with
-    | [] -> List.rev visited
-    | MNode(v, childern)::tl -> _bfs (v::visited) (  tl @ list_of_forest childern )
-  in _bfs [] [tree]
-;;
-
-let test1 () = 
-  (* big  tree:
-          1
-      /   |    \
-    2     3     4
-   /    / | \
-  5    6  7  8
-          |   
-          9
-  *)
-  let big_tree = 
-    MNode(1, 
-      Forest(MNode(2, 
-        Forest(MNode(5, EmptyForest), EmptyForest)), 
-      Forest(
-        MNode(3, 
-          Forest(MNode(6, EmptyForest), 
-          Forest(MNode(7, 
-            Forest(MNode(9, EmptyForest), EmptyForest)), 
-          Forest(MNode(8, EmptyForest), EmptyForest)) )  )
-        , 
-      Forest(MNode(4, EmptyForest), EmptyForest)) )  )
-  in
-  try 
-    assert ( dfs1 big_tree = [1; 2; 5; 3; 6; 7; 9; 8; 4]) ;
-    assert ( dfs1 @@ MNode(1, EmptyForest) = [1] ) ;
-    assert ( bfs1 big_tree = [1; 2; 3; 4; 5; 6; 7; 8; 9]) ;
-    assert ( bfs1 @@ MNode(1, EmptyForest) = [1] ) ;
-    true
-  with
-  | _ -> false
-;;
-
-
-type 'a mtree_lst = MTree of 'a * ('a mtree_lst) list;;
-
-let dfs2 tree =
-  let rec _dfs vst stack =
-    match stack with 
-    | [] -> List.rev vst
-    | MTree(v, l)::tl -> _dfs (v::vst) (l @ tl)
-  in 
-  _dfs [] [tree]
-;;
-
-let bfs2 tree =
-  let rec _bfs vst queue =
-    match queue with 
-    | [] -> List.rev vst
-    | MTree(v, l)::tl -> _bfs (v::vst) (tl @ l)
-  in 
-  _bfs [] [tree]
-;;
-
-let test2 () = 
-  (* big  tree:
-          1
-      /   |    \
-    2     3     4
-   /    / | \
-  5    6  7  8
-          |   
-          9
-  *)
-  let big_tree = 
-    MTree(1, [
-      MTree(2, [
-        MTree(5, [])]);
-      MTree(3, [
-        MTree(6,[]);
-        MTree(7, [
-          MTree(9, [])]);
-        MTree(8, [])]);
-      MTree(4, [])]) 
-  in
-  try 
-    assert ( dfs2 big_tree = [1; 2; 5; 3; 6; 7; 9; 8; 4]) ;
-    assert ( dfs2 @@ MTree(1, []) = [1] ) ;
-    assert ( bfs2 big_tree = [1; 2; 3; 4; 5; 6; 7; 8; 9]) ;
-    assert ( bfs2 @@ MTree(1, []) = [1] ) ;
-    true
-  with
-  | _ -> false
-;;
-
-let test () = test1 () && test2 () ;;

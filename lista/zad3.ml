@@ -156,37 +156,32 @@ let fill_with_0 l =
 ;;
 
 
-let encode htree   in_stream =
-  let letters_codes = codes htree in
-  let already_encoded = ref [] in
-  let last_bits = ref [] in 
+let encode stream =
+  let cache = ref [] in
+  let tmp = ref [] in 
   let rec next i = 
-    match !already_encoded with 
-    | hd::tl -> 
-      already_encoded := tl ;
-      Some hd 
+    match List.length !cache, Stream.peek stream  with 
+    | 8, _ -> tmp := !cache ; cache := [] ; Some ( list_to_byte !tmp ) 
+    | 0, None -> None
+    | _, None -> tmp := !cache ; cache := [] ; Some ( list_to_byte ( fill_with_0 !tmp ))
+    | _, Some m -> Stream.junk stream ; cache := !cache @ [m] ; next i 
+  in Stream.from next
+;;
+
+let letters_strm_to_moves_strm htree stream =
+  let cache = ref [] in 
+  let letters_codes = codes htree in
+  let rec next i = 
+    match !cache with 
+    | hd::tl -> cache := tl ; Some hd 
     | [] -> 
-      match Stream.peek in_stream with 
+      match Stream.peek stream with 
       | None -> None
-      | Some letter -> 
-        Stream.junk in_stream ;
-        let (newly_encoded, rest)  =  
-          !last_bits @ find_code letter letters_codes |>
-          split_by_8  |>
-          make_encoded ~acc:[] in 
-        last_bits := rest ; 
-        match newly_encoded, !last_bits with
-        | hd::tl, _ -> 
-          already_encoded := tl ;
-          Some hd
-        | [], [] -> None
-        | [], _ -> 
-          match Stream.peek in_stream with 
-          | Some _ -> next i 
-          | None -> 
-            last_bits := [] ;
-            Some ( list_to_byte ( fill_with_0 !last_bits ))
-  in Stream.from next 
+      | Some l -> 
+        Stream.junk stream ;
+        cache := find_code l letters_codes ;
+        next i
+  in Stream.from next
 ;;
 
 let htree_of_file filename = 
@@ -205,16 +200,18 @@ let htree_of_file filename =
 
 let generate_out_file filename out_stream =
   let outc = Out_channel.create filename in 
-  Stream.iter (fun x -> output_char outc x ) out_stream ;
+  Stream.iter (fun x -> output_char outc x  ) out_stream ;
   Out_channel.close outc
 
 ;;
+
 
 let process_in_file filename htree =
   let in_channel = open_in filename in 
   try  
     Stream.of_channel  in_channel |>
-    encode htree |>
+    letters_strm_to_moves_strm htree |>
+    encode |>
     generate_out_file "out" ;
     In_channel.close in_channel   
   with e ->

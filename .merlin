@@ -9,6 +9,7 @@ PKG core
 PKG async
 PKG core_bench
 PKG core_extended
+PKG core lwt
 PKG unix
 PKG oUnit
 PKG bytes

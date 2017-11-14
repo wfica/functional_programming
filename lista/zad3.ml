@@ -49,8 +49,8 @@ wyjściowego.
 open Core.Std;;
 
 
-(* type 'a htree = HNill | HLeaf of int * 'a | HC of int  * 'a htree * 'a htree ;; *)
-type 'a htree = HNill | HLeaf of int * char | HC of int  * char htree * char htree ;; 
+type 'a htree = HNill | HLeaf of int * 'a | HC of int  * 'a htree * 'a htree ;;
+(* type 'a htree = HNill | HLeaf of int * char | HC of int  * char htree * char htree ;;  *)
 let t1 = HC (18, HC (8, HC (4, HC (2, HLeaf (1, 'e'), HLeaf (1, 'c')), HLeaf (2, 'a')), HLeaf (4, 'b')), HLeaf (10, 'd'))
 ;;
 

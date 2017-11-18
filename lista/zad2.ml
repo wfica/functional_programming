@@ -1,145 +1,77 @@
 (*
-Zadanie 2 (8p.)
+Zadanie 2 (4p.)
 
-Mamy ciąg szklanek o znanych pojemnościach, a także kran i zlew. W każdym ruchu możemy 
-wykonać jedną z trzech czynności:
+Definiujemy typ danych do reprezentacji drzew binarnych przechowujących wartości zarówno w 
+węzłach jak i w liściach: 
 
-napełnić jedną ze szklanek wodą z kranu (FILL),
-opróżnić jedną ze szklanek do zlewu (DRAIN),
-przelać wodę z jednej ze szklanek do innej (TRANSFER).
+type 'a btree = Leaf of 'a | Node of 'a btree * 'a * 'a btree
 
-Stan takiego układu szklanek możemy zapisać przy użyciu dwóch list reprezentujących 
-odpowiednio pojemności szklanek i ilość wody znajdującą się w każdej z nich. Przykładowo, 
-para ([4; 9], [4; 6]) oznacza że dysponujemy dwiema szklankami o pojemnościach 4 i 9, oraz że 
-pierwsza z nich jest pełna, zaś w drugiej znajduje się 6 jednostek wody. W takim przypadku 
-efekty poniższych ruchów następująco zmieniają tę zawartość szklanek (czyli drugą z 
-powyższych list; zwróć uwagę że można napełnić pełną szklankę):
+(1p.) Napisz funkcję numerującą węzły i liście drzewa binarnego w kolejności przechodzenia 
+go w głąb (preorder). Na przykład, tak ponumerowaną wersją drzewa Node (Node (Leaf 'a', 'b', 
+Leaf 'c'), 'd', Leaf 'e') jest Node (Node (Leaf 3, 2, Leaf 4), 1, Leaf 5).
+(3p.) Napisz funkcję numerującą węzły i liście drzewa binarnego w kolejności przechodzenia 
+go wszerz. Na przykład, tak ponumerowaną wersją drzewa Node (Node (Leaf 'a', 'b', Leaf 'c'), 
+'d', Leaf 'e') jest Node (Node (Leaf 4, 2, Leaf 5), 1, Leaf 3).
+Wskazówka: lasy numeruje się łatwiej niż drzewa.
 
-FILL 1 → [4; 9]
-FILL 0 → [4; 6]
-DRAIN 0 → [0; 6]
-TRANSFER (0, 1) → [1; 9].
-
-Dla danego zestawu szklanek i danej objętości wody, rozwiązaniem nazywamy ciąg ruchów, który 
-prowadzi do uzyskania w dowolnej ze szklanek zadanej objętości wody. Przykładowo, dla szklanek 
-[4, 9] i objętości 5, rozwiązaniem jest ciąg [FILL 1, TRANSFER (1, 0)] (a także wiele innych, 
-redundantnych ciągów).
-
-Użyj leniwych list aby zdefiniować funkcję nsols : (int list * int) -> int -> move list list, 
-taką że nsols (glasses, volume) n zwróci listę n najkrótszych rozwiązań problemu zadanego 
-przez glasses i volume (typ danych move powinien reprezentować pojedynczy ruch). W przypadku gdy 
-rozwiązanie nie istnieje, program może się zapętlić.
-
-Wskazówka: 
-Ponieważ dopuszczamy redundantne ciągi (np. przelewanie z pustego w próżne), a 
-także możemy się zapętlić gdy rozwiązanie nie istnieje, nie potrzeba sprawdzać czy daną 
-konfigurację można osiągnąć w inny (potencjalnie lepszy) sposób.
-
-Uwaga: 
-Dzięki użyciu leniwych list, możliwa jest implementacja, w której w programie let f = 
-nsols (g, v) in (f n; f n) drugie wywołanie f n działa w czasie O(n).
 *)
 open Core.Std;;
-open Llist;;
-type move = Fill of int | Drain of int | Transfer of int * int 
+type 'a btree = Leaf of 'a | Node of 'a btree * 'a * 'a btree;;
+
+
+
+let preorder tree =
+  let rec dfs tree cnt = 
+    match tree with
+    | Leaf(_) -> Leaf(cnt), (cnt+1)
+    | Node(l, _, r) ->
+      let l_, cnt_  = dfs l (cnt + 1) in
+      let r_, cnt__ = dfs r cnt_  in
+      Node(l_, cnt, r_), cnt__
+  in dfs tree 1 
 ;;
 
-
-let generate_fills state glasses =
-	let state_val = fst state in 
-	let zipped = List.zip_exn state_val glasses in 
-	List.foldi zipped ~init:[] ~f:(fun i acc (s, g) -> 
-	if s = g 
-	then acc 
-	else((List.take state_val i @ [g] @ List.drop state_val (i+1) ), Fill i :: snd state )::acc   )
-;;
-
-let generate_drains state =
-	let state_val = fst state in  
-	List.foldi state_val ~init:[] ~f:(fun i acc s -> 
-	if s = 0
-	then acc 
-	else((List.take state_val i @ [0] @ List.drop state_val (i+1) ), Drain i :: snd state )::acc   )
-;;
-
-let generate_pairs n =
-  List.range 0 n 
-  |> List.concat_map ~f:(fun i -> List.range 0 i @ List.range (i+1) n  |> 
-                                  List.map ~f:(fun e -> (i, e) ) )
-;;
-
-let take_interval l a b =
-  let rec _take_interval l a b = 
-    match a, l with 
-    | 0, _ -> List.take l b
-    | _, _::tl -> _take_interval tl (a-1) (b-1)
-    | _, _ -> failwith "take_interval failure" 
-  in _take_interval l (max 0 a) b 
-;;
-
-let transfer state glasses i j n =
-  let part = take_interval state  
-  and s_i = List.nth_exn state i 
-  and s_j = List.nth_exn state j 
-  and g_j = List.nth_exn glasses j in
-  let new_val = min (s_j + s_i) g_j in
-  if i < j 
-  then part 0 i @ [s_i - new_val + s_j] @ part (i+1) j @ [new_val] @ part (j+1) n 
-  else part 0 j @ [new_val] @ part (j+1) i @ [s_i - new_val + s_j] @ part (i+1) n 
-;;
-
-
-let generate_transfers state glasses n = 
-  generate_pairs n  |>
-  List.map ~f:(fun (i, j) -> (transfer (fst state) glasses i j n, 
-                              Transfer (i,j):: (snd state)  ) )
-;;
-
-let generate_states state glasses n =
-  generate_drains state @ 
-  generate_fills state glasses @
-  generate_transfers state glasses n
-;; 
-
-let zeros n = 
-  let rec _repeat value n acc =
-    match n with 
-    | 0 -> acc
-    | _ -> _repeat value (n-1) (value::acc)
-  in _repeat 0 n []
-;;
-
-
-let find_all_moves (glasses, volume) =
-  let rec bfs queue n =
-    match Queue.dequeue queue with
-    | None -> LNil
-    | Some state -> 
-      let new_states = generate_states state glasses n in 
-      let _ = Queue.enqueue_all queue new_states in
-      match List.find new_states ~f:(fun (s, _) -> 
-          List.exists s ~f:(fun elem -> elem = volume) ) with
-      |	None -> bfs queue n
-      | Some result -> LC( result, lazy(  bfs queue n ) )
+let bfs_order tree =
+  let rec zip_layers layer rec_result cnt  =
+    match layer with 
+    | [] -> []
+    | hd::tl -> 
+      match hd, rec_result with 
+      | Leaf(_), _ -> Leaf(cnt) :: zip_layers tl rec_result (cnt+1)
+      | Node(_), e1::e2::rest -> Node(e1, cnt, e2) :: zip_layers tl rest (cnt+1)
+      | _, _ -> failwith "unreachable"
   in 
-  let n = List.length glasses in
-  let queue = Queue.create () in 
-  let _ = Queue.enqueue queue (zeros n, []) in
-  bfs queue n 
-;;
-
-let nsols (glasses, volume) =
-	let possibilities = find_all_moves (glasses, volume) in 
-	function n -> ltake possibilities  n
+  let rec bfs layer cnt =
+    if layer = [] then [] else
+    let next_layer = List.concat_map layer ~f:(fun node -> match node with | Leaf _ -> [] | Node (l, _, r)-> [l; r]) in 
+    let rec_result = bfs next_layer (cnt + List.length layer ) in 
+    zip_layers layer rec_result cnt in 
+  bfs [tree] 1
 ;;
 
 
+let test_case expression number =
+  try 
+    match expression with 
+    | lazy (a, b) -> assert (a = b)
+  with 
+  | e ->  printf "test number %i failed" number ;
+    raise e 
+;;
 
 let test () =
-	let f = nsols ([4;9], 5) in
-	let _ = f 5 in
-	let _ = f 6 in 
-	true
+  let in0 = Node (Node (Leaf 'a', 'b', Leaf 'c'), 'd', Leaf 'e') in
+  let out0 = Node (Node (Leaf 3, 2, Leaf 4), 1, Leaf 5) in
+  let in1 = Leaf('a') in
+  let out1 = Leaf(1) in
+  let in2 = Node (Node (Leaf 'a', 'b', Leaf 'c'), 'd', Leaf 'e') in 
+  let out2 = Node (Node (Leaf 4, 2, Leaf 5), 1, Leaf 3) in 
+  try 
+    test_case (lazy( preorder in0 |> fst , out0 )) 0;
+    test_case (lazy( preorder in1 |> fst , out1 )) 1;
+    test_case (lazy( bfs_order in2 |> List.hd_exn, out2 ) ) 2;
+    test_case (lazy( bfs_order in1 |> List.hd_exn, out1 ) ) 3;
+    true
+  with 
+  | _ -> false
 ;;
-
-test () ;;

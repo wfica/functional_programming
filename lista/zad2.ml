@@ -1,77 +1,62 @@
 (*
-Zadanie 2 (4p.)
 
-Definiujemy typ danych do reprezentacji drzew binarnych przechowujących wartości zarówno w 
-węzłach jak i w liściach: 
+Zadanie 2 (3p.)
 
-type 'a btree = Leaf of 'a | Node of 'a btree * 'a * 'a btree
+Rozważmy modyfikowalne listy zdefiniowane następująco: 
 
-(1p.) Napisz funkcję numerującą węzły i liście drzewa binarnego w kolejności przechodzenia 
-go w głąb (preorder). Na przykład, tak ponumerowaną wersją drzewa Node (Node (Leaf 'a', 'b', 
-Leaf 'c'), 'd', Leaf 'e') jest Node (Node (Leaf 3, 2, Leaf 4), 1, Leaf 5).
-(3p.) Napisz funkcję numerującą węzły i liście drzewa binarnego w kolejności przechodzenia 
-go wszerz. Na przykład, tak ponumerowaną wersją drzewa Node (Node (Leaf 'a', 'b', Leaf 'c'), 
-'d', Leaf 'e') jest Node (Node (Leaf 4, 2, Leaf 5), 1, Leaf 3).
-Wskazówka: lasy numeruje się łatwiej niż drzewa.
+type 'a list_mutable = LMnil | LMcons of 'a * 'a list_mutable ref
 
+Zaimplementuj konkatenację list typu 'a list_mutable na dwa sposoby:
+funkcja concat_copy buduje listę wynikową kopiując pierwszy argument;
+funkcja concat_share buduje listę wynikową bez kopiowania argumentów.
+;; 
 *)
-open Core.Std;;
-type 'a btree = Leaf of 'a | Node of 'a btree * 'a * 'a btree;;
-
-
-
-let preorder tree =
-  let rec dfs tree cnt = 
-    match tree with
-    | Leaf(_) -> Leaf(cnt), (cnt+1)
-    | Node(l, _, r) ->
-      let l_, cnt_  = dfs l (cnt + 1) in
-      let r_, cnt__ = dfs r cnt_  in
-      Node(l_, cnt, r_), cnt__
-  in dfs tree 1 
 ;;
 
-let bfs_order tree =
-  let rec zip_layers layer rec_result cnt  =
-    match layer with 
-    | [] -> []
-    | hd::tl -> 
-      match hd, rec_result with 
-      | Leaf(_), _ -> Leaf(cnt) :: zip_layers tl rec_result (cnt+1)
-      | Node(_), e1::e2::rest -> Node(e1, cnt, e2) :: zip_layers tl rest (cnt+1)
-      | _, _ -> failwith "unreachable"
-  in 
-  let rec bfs layer cnt =
-    if layer = [] then [] else
-    let next_layer = List.concat_map layer ~f:(fun node -> match node with | Leaf _ -> [] | Node (l, _, r)-> [l; r]) in 
-    let rec_result = bfs next_layer (cnt + List.length layer ) in 
-    zip_layers layer rec_result cnt in 
-  bfs [tree] 1
+type 'a list_mutable = LMnil | LMcons of 'a * 'a list_mutable ref
+
+let rec len l =
+  match l with
+  | LMnil -> 0
+  |LMcons(_, tl) -> 1 + len !tl
+;;
+
+let rec concat_copy l1 l2 = 
+  match l1 with
+  | LMnil -> l2
+  | LMcons(e, tl) -> LMcons(e, ref @@ concat_copy !tl l2)
 ;;
 
 
-let test_case expression number =
+let concat_share l1 l2 =
+  let rec aux l1 l2 =
+    match !l1 with 
+    | LMnil -> l1 := l2 
+    | LMcons(_, tl) -> aux tl l2
+  in aux l1 l2 
+;;
+
+let test_case (lazy (a, b)) number =
   try 
-    match expression with 
-    | lazy (a, b) -> assert (a = b)
+    assert (a = b)
   with 
-  | e ->  printf "test number %i failed" number ;
+  | e ->  Core.Std.printf "test number %i failed" number ;
     raise e 
 ;;
 
+
 let test () =
-  let in0 = Node (Node (Leaf 'a', 'b', Leaf 'c'), 'd', Leaf 'e') in
-  let out0 = Node (Node (Leaf 3, 2, Leaf 4), 1, Leaf 5) in
-  let in1 = Leaf('a') in
-  let out1 = Leaf(1) in
-  let in2 = Node (Node (Leaf 'a', 'b', Leaf 'c'), 'd', Leaf 'e') in 
-  let out2 = Node (Node (Leaf 4, 2, Leaf 5), 1, Leaf 3) in 
+  let l1 = LMcons(1, ref @@ LMcons(2, ref LMnil)) in 
+  let l2 = LMcons(3, ref LMnil) in 
+  let l3 = concat_copy l1 l2 in 
+  let l4_ = ref @@ LMcons(11, ref @@ LMcons(22, ref LMnil)) in
+  concat_share l4_ l3 ;
   try 
-    test_case (lazy( preorder in0 |> fst , out0 )) 0;
-    test_case (lazy( preorder in1 |> fst , out1 )) 1;
-    test_case (lazy( bfs_order in2 |> List.hd_exn, out2 ) ) 2;
-    test_case (lazy( bfs_order in1 |> List.hd_exn, out1 ) ) 3;
+    test_case( lazy(len l3, 3) ) 0;
+    test_case( lazy(len !l4_, 5) ) 1;
     true
-  with 
-  | _ -> false
+  with
+  |_ -> false
 ;;
+
+

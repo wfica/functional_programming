@@ -24,10 +24,14 @@ wersję funkcji fib_memo, która  lepiej wykorzysta technikę memoizacji.
 
 type ordering = LT | EQ | GT ;;
 
-module type ORDER =
-sig
-  type t
-  val compare: t -> t -> ordering
+module type DICTIONARY =
+sig 
+  type key
+  type 'a t 
+  exception DuplicatedKey of key
+  val empty: unit -> 'a t
+  val lookup: 'a t -> key -> 'a option
+  val insert: 'a t -> key -> 'a -> 'a t
 end ;;
 
 module type KEY_HASHING =    
@@ -44,65 +48,56 @@ struct
     (fk *. 0.618034 -. floor (fk *. 0.618034) ) *. 32768. |> int_of_float
 end;;
 
-module type DICTIONARY =
-sig 
-  type key
-  type 'a t 
-  exception DuplicatedKey of key
-  val empty: unit -> 'a t
-  val lookup: 'a t -> key -> 'a option
-  val insert: 'a t -> key -> 'a -> 'a t
-end ;;
-
-module Dictionary (Key: ORDER):  DICTIONARY with type key = Key.t  =
+(*!!  jak ładnie dodać jakieś hashowanie, dziedziczenie, bardziej sparametryzować??*)
+module Dictionary (Hash: KEY_HASHING):  DICTIONARY with type key = Hash.t =
 struct
-  type key = Key.t
-  type 'a t = Tip | Node of key * 'a * 'a t * 'a t
+  type key = Hash.t
+  type 'a t = Tip | Node of int * 'a * 'a t * 'a t
   exception DuplicatedKey of key
   let empty () = Tip
-  let rec lookup tree key = 
-    match tree with
-    | Tip -> None
-    | Node(k, value, t1, t2) ->
-      match Key.compare key k with 
-      | LT -> lookup t1 key
-      | EQ -> Some value
-      | GT -> lookup t2 key
+
+  let sign x = if x = 0 then EQ else if x > 0 then GT else LT 
+
+  let lookup tree key = 
+    let rec _lookup tree hkey = 
+      match tree with
+      | Tip -> None
+      | Node(hk, value, t1, t2) ->
+        match sign @@ compare hkey hk with 
+        | LT -> _lookup t1 hkey
+        | EQ -> Some value
+        | GT -> _lookup t2 hkey
+    in _lookup tree (Hash.hash key)
 
 
-  let rec insert tree key value =
-    match tree with
-    | Tip -> Node(key, value, Tip, Tip)
-    | Node(k, v, t1, t2) -> 
-      match Key.compare key k with 
-      | LT -> Node(k, v, insert t1 key value, t2)
-      | EQ -> raise (DuplicatedKey key)
-      | GT -> Node(k, v, t1, insert t2 key value) 
+  let insert tree key value = 
+    let rec _insert tree hkey value =
+      match tree with
+      | Tip -> Node(hkey, value, Tip, Tip)
+      | Node(hk, v, t1, t2) -> 
+        match sign @@ compare hkey hk with 
+        | LT -> Node(hk, v, _insert t1 hkey value, t2)
+        | EQ -> raise (DuplicatedKey key)
+        | GT -> Node(hk, v, t1, _insert t2 hkey value) 
+    in _insert tree (Hash.hash key) value
 end;;
 
 
-module IntOrder : ORDER with type t = int = 
-struct
-  type t = int
-  let compare a b = 
-    let cmp = Pervasives.compare a b in 
-    if cmp < 0 then  LT else if cmp > 0 then GT else EQ
-end;;
 
-module IntDict = Dictionary(IntOrder);;
+module HashDict = Dictionary(IntHash);;
 
 
-
+(*!!  jak zrobić funkcję, która będzie przyjmować dict:DICTIONARY ??*)
 let memoize f =
-  let cache = ref  (IntDict.empty () ) in 
+  let cache = ref  (HashDict.empty () ) in 
   let f_memo = fun x ->
-    match IntDict.lookup !cache x with
+    match HashDict.lookup !cache x with
     | Some y -> y 
     | None ->
       let res = f x in
-      cache := IntDict.insert !cache x res ;
+      cache := HashDict.insert !cache x res ;
       res 
-in f_memo
+  in f_memo
 ;;
 
 let rec fib n = if n > 0 then fib(n-2) + fib (n-1) else 1;;
@@ -136,10 +131,10 @@ let run_bench () =
      Bench.Test.create ~name:"fib_memo" (fun () -> ignore ( fib_memo_bench 20 ))]
 ;;
 (*
-┌──────────┬──────────────┬─────────┐
-│ Name     │     Time/Run │ mWd/Run │
-├──────────┼──────────────┼─────────┤
-│ fib      │ 520_436.42ns │         │
-│ fib_memo │      88.40ns │   2.00w │
-└──────────┴──────────────┴─────────┘
+┌──────────┬──────────────┬─────────┬─────────┐
+│ Name     │     Time/Run │ mWd/Run │ mGC/Run │
+├──────────┼──────────────┼─────────┼─────────┤
+│ fib      │ 512_556.89ns │         │         │
+│ fib_memo │     155.03ns │  17.00w │ 0.06e-3 │
+└──────────┴──────────────┴─────────┴─────────┘
 *)

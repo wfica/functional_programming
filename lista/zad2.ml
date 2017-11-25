@@ -11,7 +11,6 @@ funkcja concat_copy buduje listę wynikową kopiując pierwszy argument;
 funkcja concat_share buduje listę wynikową bez kopiowania argumentów.
 ;; 
 *)
-;;
 
 type 'a list_mutable = LMnil | LMcons of 'a * 'a list_mutable ref
 

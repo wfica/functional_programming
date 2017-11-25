@@ -26,7 +26,6 @@ itd... oraz funkcję reset typu int -> unit, która ustawia początkową wartoś
 
 Uwaga! Funkcje nie mogą wykorzystywać żadnych zmiennych globalnych.
 *)
-;;
 
 let fresh = 
   let idx = ref 0 in

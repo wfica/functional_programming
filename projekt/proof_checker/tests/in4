@@ -1,0 +1,6 @@
+goal doubleImplication: A => A => A
+proof
+    [ A : [ A : A];
+            A => A];
+    A => A => A
+end.

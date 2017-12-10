@@ -1,0 +1,5 @@
+goal prec1: ~A /\ ~B
+proof
+    XX <=> Y => Z;
+    ~(P \/ Q) => ~P /\ ~Q
+end.

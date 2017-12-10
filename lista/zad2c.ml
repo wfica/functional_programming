@@ -46,8 +46,6 @@ struct
   let peek q = if is_empty q then None else Some (remove q)
 end 
 
-
-
 module type SORT = 
 sig
   type elem 

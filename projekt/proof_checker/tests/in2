@@ -1,0 +1,5 @@
+goal implication: A => A
+proof
+    [ A : A ];
+    A => A
+end.

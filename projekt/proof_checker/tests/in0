@@ -3,3 +3,16 @@ proof
     A;
     A
 end.
+goal modusPonens: A /\ (A => B) => B
+proof
+    [   A /\ (A => B) :
+        A;
+        A => B;
+        B ];
+    A /\ (A => B) => B
+end.
+goal goal1: A => A \/ ~A
+proof
+    [A : A \/ ~A];
+    A => A \/ ~A
+end.

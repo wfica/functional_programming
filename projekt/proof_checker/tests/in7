@@ -1,0 +1,4 @@
+goal double_neg: A /\ ~~~A => ~~A
+proof
+    A
+end.

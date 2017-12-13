@@ -16,6 +16,9 @@ test:
 	$(OCB) test.native
 	./test.native
 
+proof_checker: clean parser.cmo lexer.cmo rules.cmo natural_deduction.cmo
+	$(OCB) proof_checker.native 
+
 %.native:
 	$(OCB) $@
 

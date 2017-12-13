@@ -3,3 +3,8 @@ proof
     [ A : A ];
     A => A
 end.
+goal implication: A => A
+proof
+    [ A : A ];
+    A => A
+end.

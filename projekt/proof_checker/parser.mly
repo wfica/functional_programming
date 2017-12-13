@@ -26,7 +26,7 @@ open Proof_type
 %right IMPL
 %left OR
 %left AND
-%left NOT
+%nonassoc NOT
 
 
 %start <Proof_type.task list> prog

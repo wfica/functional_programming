@@ -12,8 +12,23 @@ and  proof = Proof of proof_item list
 
 type task = Task of string * formula * proof
 
-(* funkcje do wypisywania formuł - pomocnicze, tylko do testowania *)
+let item_to_formula item = 
+  match item with 
+  | (Formula(f)) -> f 
+  | _ -> failwith "cannot convert hypothesis to formula"
+  
+  let get_double_negated formula = 
+    match formula with 
+    | Not(Not(x)) -> Some x
+    | _ -> None
+    
 open Core.Std
+let is_task_valid (Task(_, goal, Proof(proof))) =
+  match List.last proof with
+  | None -> false
+  | Some item -> item_to_formula item = goal 
+
+(* funkcje do wypisywania formuł - pomocnicze, tylko do testowania *)
 let rec print_formula  f = 
   match f with 
   | Variable(s) -> printf "%s" s 

@@ -1,6 +1,0 @@
-goal doubleImplication: A => B => A
-proof
-    [ A : [ B : A];
-            B => A];
-    A => B => A
-end.

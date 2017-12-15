@@ -1,10 +1,5 @@
-goal implication: A => A
+goal implication: A => B
 proof
-    [ A : A ];
-    A => A
-end.
-goal implication: A => A
-proof
-    [ A : A ];
-    A => A
+    [ A : F; B];
+    A => B
 end.

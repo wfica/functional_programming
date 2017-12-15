@@ -16,6 +16,7 @@ struct
     | Hypothesis(_, Proof(proof)) ->  List.last_exn proof |> item_to_formula 
     | _ -> failwith "cannot get goal of a Formula"
 
+
   let rec _proof (Proof(l)) known_truth =
     let is_item_OK i truth item =
       match item with 
@@ -32,6 +33,6 @@ struct
   let proof ?(known_truth=[]) outx p  =
     try _proof p known_truth with 
       IncorrectProof(msg) -> 
-      Out_channel.output_string outx @@ "  Błąd w dowodzie w formule numer " ^  string_of_int msg ^ "\n"; 
+      Out_channel.output_string outx @@ "  Błąd w dowodzie w linijce numer " ^  string_of_int msg ^ "\n"; 
       false 
 end

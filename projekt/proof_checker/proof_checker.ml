@@ -40,6 +40,11 @@ let parse_inFile inFile outFile () =
   In_channel.close inx ;
   solve tasks outFile
 
+
+(* let _ = parse_inFile "tests/in2" "results/out" ()  *)
+
+
+
 let () =
   Command.basic 
     ~summary:"Proof checker - Wojtek Fica"

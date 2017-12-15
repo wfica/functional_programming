@@ -16,12 +16,12 @@ let item_to_formula item =
   match item with 
   | (Formula(f)) -> f 
   | _ -> failwith "cannot convert hypothesis to formula"
-  
-  let get_double_negated formula = 
-    match formula with 
-    | Not(Not(x)) -> Some x
-    | _ -> None
-    
+
+let get_double_negated formula = 
+  match formula with 
+  | Not(Not(x)) -> Some x
+  | _ -> None
+
 open Core.Std
 let is_task_valid (Task(_, goal, Proof(proof))) =
   match List.last proof with

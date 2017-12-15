@@ -25,8 +25,6 @@ rule read =
   | "goal"    { GOAL }
   | "proof"   { BEGIN_PROOF }
   | "end."    { END_PROOF }
-  | task_name { TASK_NAME (Lexing.lexeme lexbuf) }
-  | id        { VARIABLE (Lexing.lexeme lexbuf) }
   | 'T'       { TRUE }
   | 'F'       { FALSE }
   | "/\\"     { AND }
@@ -40,5 +38,7 @@ rule read =
   | ')'       { RIGHT_BRACK }
   | '['       { LEFT_SQUARE_BRACK }
   | ']'       { RIGHT_SQUARE_BRACK }
+  | task_name { TASK_NAME (Lexing.lexeme lexbuf) }
+  | id        { VARIABLE (Lexing.lexeme lexbuf) }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof       { EOF }

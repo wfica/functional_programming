@@ -27,7 +27,7 @@ struct
       | Or(x, y) -> is_true (Impl(x, goal)) && is_true (Impl(y, goal))
       | Impl(x, y) -> y =  goal && is_true x 
       | Const(x) -> x = false
-      | Variable(_) -> true
+      | Variable(_) -> false
       | Iff(x, y) -> x = goal && is_true y || y = goal && is_true x  
       | Not(x)  -> 
         if goal = Const(false) then is_true x 

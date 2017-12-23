@@ -19,3 +19,4 @@ goal axiom: P \/ Q
 proof
     P \/ Q
 end.
+

@@ -24,7 +24,8 @@ rule read =
   | newline   { next_line lexbuf; read lexbuf }
   | "goal"    { GOAL }
   | "proof"   { BEGIN_PROOF }
-  | "end."    { END_PROOF }
+  | "end."    { END }
+  | "axioms"  { AXIOMS }
   | 'T'       { TRUE }
   | 'F'       { FALSE }
   | "/\\"     { AND }

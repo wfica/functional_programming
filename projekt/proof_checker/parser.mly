@@ -4,9 +4,10 @@ open Proof_type
 
 %token <string> TASK_NAME
 %token <string> VARIABLE
+%token AXIOMS
 %token GOAL
 %token BEGIN_PROOF
-%token END_PROOF
+%token END
 %token TRUE
 %token FALSE
 %token AND
@@ -29,17 +30,19 @@ open Proof_type
 %nonassoc NOT
 
 
-%start <Proof_type.task list> prog
+%start <(Proof_type.formula list) * (Proof_type.task list)> prog
 
 %%
 prog:
-  tl = list(task) EOF { tl };
+  | tl = list(task) EOF { ([],tl) };
+  | AXIOMS; COLON; ax =list(formula) ;  tl = list(task) EOF { (ax , tl) };
+
 
 task:
   GOAL; task_name = TASK_NAME ; COLON;  goal = formula;
   BEGIN_PROOF;
   pil = proof;
-  END_PROOF                                               { Task( task_name, goal, pil) };
+  END                                               { Task( task_name, goal, pil) };
   
 formula:
   | LEFT_BRACK; f = formula; RIGHT_BRACK  { f }

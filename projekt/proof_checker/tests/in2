@@ -1,5 +1,21 @@
-goal implication: A => B
+axioms:
+( P /\ Q => R) => P => Q => R
+P 
+R
+
+goal prawoExportacji: ( P /\ Q => R) => P => Q => R
 proof
-    [ A : F; B];
-    A => B
+    ( P /\ Q => R) => P => Q => R
+end.
+goal tautologia: P  <=> ( P /\ Q => R) => P => Q => R
+proof
+    [P : ( P /\ Q => R) => P => Q => R];
+    P => ( P /\ Q => R) => P => Q => R;
+    [( P /\ Q => R) => P => Q => R : P];
+    ( ( P /\ Q => R) => P => Q => R ) => P;
+    P  <=> ( P /\ Q => R) => P => Q => R
+end.
+goal axiom: P \/ Q
+proof
+    P \/ Q
 end.

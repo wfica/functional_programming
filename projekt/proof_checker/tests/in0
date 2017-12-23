@@ -50,7 +50,7 @@ end.
 
 goal prawoExportacji: ( P /\ Q => R) => P => Q => R
 proof
-    [P /\ Q => R : [P : [Q : R]; Q => R]; P => Q => R];
+    [P /\ Q => R : [P : [Q :  P /\ Q; R]; Q => R]; P => Q => R];
     ( P /\ Q => R) => P => Q => R
 end.
 

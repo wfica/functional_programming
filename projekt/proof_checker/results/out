@@ -1,2 +1,3 @@
-0:  Błąd w dowodzie w linijce numer 0
-    Dowód implication błędny!
+0:    Dowód prawoExportacji poprawny.
+1:    Dowód tautologia poprawny.
+2:    Dowód axiom poprawny.

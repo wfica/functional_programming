@@ -67,6 +67,38 @@ let hypothesis_to_box h  : box=
   | Hypothesis(f, _) ->  f, (hypothesis_goal h)
   | _ -> failwith " cannot get a box out of a Formula"
 
+let rec terms_of_term t = 
+  match t with
+  | Var(_) -> [t]
+  | Fun(f, l) -> t::List.concat_map l ~f:terms_of_term 
+
+let rec terms_of_formula f =
+  match f with
+  | Pred(p, l) -> List.concat_map l ~f:terms_of_term 
+  | Const(_) -> []
+  | Not(x) -> terms_of_formula x
+  | And(a, b)| Or(a, b) | Impl(a, b) | Iff(a,b) -> terms_of_formula a @ terms_of_formula b
+  | Exists(_, x) | All(_, x) -> terms_of_formula x
+
+let terms_of_axioms (a : formula list)  =
+  List.concat_map a ~f:terms_of_formula |>
+  List.dedup 
+
+let terms_of_assumption (a : assumption)=
+  match a with
+  | Form(f) -> terms_of_formula f
+  | Fresh(v) -> [Var(v)]
+  | Fresh_Form(v, f) -> (Var v) :: terms_of_formula f 
+
+let rec terms_of_proof_item (p : proof_item) = 
+  match p with
+  | Formula(f) -> terms_of_formula f
+  | Hypothesis(assumption, proof) -> terms_of_assumption assumption @ terms_of_proof proof
+and terms_of_proof (Proof(l)) = 
+  List.concat_map l ~f:terms_of_proof_item |>
+  List.dedup
+  
+
 (* substitutes subs for x in term *)
 let rec substitute_term ~subs x term  = 
   match term with 

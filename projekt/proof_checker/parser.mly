@@ -2,7 +2,7 @@
 open Proof_type
 %}
 
-%token <string> TASK_NAME
+%token <string> NAME
 %token <string> VARIABLE
 %token AXIOMS
 %token GOAL
@@ -23,11 +23,15 @@ open Proof_type
 %token RIGHT_SQUARE_BRACK
 %token EOF
 
+%token <string> ALL
+%token <string> EXISTS
+%token COMMA
+
 %left IFF  /* lowest precedence  */
 %right IMPL
 %left OR
 %left AND
-%nonassoc NOT
+%nonassoc NOT ALL EXISTS
 
 
 %start <(Proof_type.formula list) * (Proof_type.task list)> prog
@@ -39,21 +43,28 @@ prog:
 
 
 task:
-  GOAL; task_name = TASK_NAME ; COLON;  goal = formula;
+  GOAL; task_name = NAME ; COLON;  goal = formula;
   BEGIN_PROOF;
   pil = proof;
   END                                               { Task( task_name, goal, pil) };
   
+term: 
+  | v = VARIABLE                                                           { Var(v) }
+  | func = NAME; LEFT_BRACK; l = separated_list(COMMA, term); RIGHT_BRACK  { Fun(func, l) }
+
 formula:
   | LEFT_BRACK; f = formula; RIGHT_BRACK  { f }
   | TRUE                                  { Const(true)  }
   | FALSE                                 { Const(false) }
-  | v = VARIABLE                          { Variable(v)  }
+  | pred = NAME; LEFT_BRACK; l = separated_list(COMMA, term); RIGHT_BRACK 
+                                          { Pred(pred, l)}
   | NOT; f = formula                      { Not(f)       }
   | f1 = formula;  AND; f2 = formula      { And(f1,f2)   }
   | f1 = formula;  OR; f2 = formula       { Or(f1,f2)    }
   | f1 = formula;  IMPL; f2 = formula     { Impl(f1,f2)  }
   | f1 = formula;  IFF; f2 = formula      { Iff(f1,f2)   }
+  | x = ALL; f = formula                  { All(x, f)    }
+  | x = EXISTS; f = formula               { Exists(x, f) }
 
 proof_item:
   | LEFT_SQUARE_BRACK; f = formula; COLON ;

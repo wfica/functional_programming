@@ -10,16 +10,19 @@ let parse_with_error lexbuf =
   try Parser.prog Lexer.read lexbuf with
   | Lexer.SyntaxError msg ->
     fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    []
+    [], []
   | Parser.Error ->
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
     exit (-1)
 
 let parse_and_print lexbuf =
   match parse_with_error lexbuf with
-  | []-> ()
+  | [], []-> ()
   | _ as l -> 
-  Proof_type.output_task_list l 
+  printf "axioms:\n" ;
+  List.iter (fst l ) ~f:( fun f -> Proof_type.print_formula f  ; printf "\n" ) ;
+  printf "\ntasks:\n " ; 
+  Proof_type.output_task_list (snd l ) 
 
 
 let loop filename () =

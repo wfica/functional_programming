@@ -2,8 +2,8 @@
 open Proof_type
 %}
 
-%token <string> NAME
-%token <string> VARIABLE
+%token <string> NAME     /* name of a predicate starting with upper-case letter except for 'A' and 'E' */
+%token <string> VARIABLE /* name of a variable or a goal or a function starting with lower-case letter  */
 %token AXIOMS
 %token GOAL
 %token BEGIN_PROOF
@@ -26,6 +26,7 @@ open Proof_type
 %token <string> ALL
 %token <string> EXISTS
 %token COMMA
+%token FRESH
 
 %left IFF  /* lowest precedence  */
 %right IMPL
@@ -39,38 +40,46 @@ open Proof_type
 %%
 prog:
   | tl = list(task) EOF { ([],tl) };
-  | AXIOMS; COLON; ax =list(formula) ;  tl = list(task) EOF { (ax , tl) };
+  | AXIOMS; COLON; ax = separated_list(SEMI_COLON, formula) ;  
+                   tl = list(task) EOF { (ax , tl) };
 
 
 task:
-  GOAL; task_name = NAME ; COLON;  goal = formula;
+  GOAL; task_name = VARIABLE ; COLON;  goal = formula;
   BEGIN_PROOF;
   pil = proof;
   END                                               { Task( task_name, goal, pil) };
   
 term: 
   | v = VARIABLE                                                           { Var(v) }
-  | func = NAME; LEFT_BRACK; l = separated_list(COMMA, term); RIGHT_BRACK  { Fun(func, l) }
+  | func = VARIABLE; LEFT_BRACK; l = separated_list(COMMA, term); RIGHT_BRACK  { Fun(func, l) }
+
+assumption:
+  | f = formula                       { Form(f) }
+  | FRESH; v = VARIABLE               { Fresh(v) }
+  | FRESH; v = VARIABLE; f = formula  { Fresh_Form(v, f) }
 
 formula:
   | LEFT_BRACK; f = formula; RIGHT_BRACK  { f }
-  | TRUE                                  { Const(true)  }
-  | FALSE                                 { Const(false) }
+  | TRUE                                  { Const(true)   }
+  | FALSE                                 { Const(false)  }
   | pred = NAME; LEFT_BRACK; l = separated_list(COMMA, term); RIGHT_BRACK 
-                                          { Pred(pred, l)}
-  | NOT; f = formula                      { Not(f)       }
-  | f1 = formula;  AND; f2 = formula      { And(f1,f2)   }
-  | f1 = formula;  OR; f2 = formula       { Or(f1,f2)    }
-  | f1 = formula;  IMPL; f2 = formula     { Impl(f1,f2)  }
-  | f1 = formula;  IFF; f2 = formula      { Iff(f1,f2)   }
-  | x = ALL; f = formula                  { All(x, f)    }
-  | x = EXISTS; f = formula               { Exists(x, f) }
+                                          { Pred(pred, l) }
+  | pred = NAME;                          { Pred(pred, [])}
+  | NOT; f = formula                      { Not(f)        }
+  | f1 = formula;  AND; f2 = formula      { And(f1,f2)    }
+  | f1 = formula;  OR; f2 = formula       { Or(f1,f2)     }
+  | f1 = formula;  IMPL; f2 = formula     { Impl(f1,f2)   }
+  | f1 = formula;  IFF; f2 = formula      { Iff(f1,f2)    }
+  | x = ALL; f = formula                  { All(x, f)     }
+  | x = EXISTS; f = formula               { Exists(x, f)  }
 
 proof_item:
-  | LEFT_SQUARE_BRACK; f = formula; COLON ;
+  | LEFT_SQUARE_BRACK; a = assumption; COLON ;
     pil = proof;
-    RIGHT_SQUARE_BRACK                      { Hypothesis(f, pil) }
+    RIGHT_SQUARE_BRACK                      { Hypothesis(a, pil) }
   | f = formula                             { Formula(f) }
+
 
 proof:
   | l = separated_list(SEMI_COLON, proof_item) { Proof(l) }

@@ -1,7 +1,6 @@
-axioms
+axioms:
 E x P(x);
 A x A y (P(x) => Q(y))
-end.
 
 goal test1: A x Q(f(x))
 proof
@@ -9,9 +8,9 @@ proof
     	[fresh b P(b):
     		A y (P(b) => Q(y));
     		P(b) => Q(f(a));
-    		Q(f(a));
+    		Q(f(a))
     	];
-    	Q(f(a));
+    	Q(f(a))
     ];
     A x Q(f(x))
 end.
@@ -29,7 +28,7 @@ proof
 		A x S(x);
 		(A x W(x)) /\ (A x S(x) ) ];
 	( A x (W(x) /\ S(x)) ) => (A x W(x) ) /\ (A x S(x) )
-end
+end.
 
 goal test3: ~E x W(x) => A x ~W(x)
 proof
@@ -44,10 +43,10 @@ proof
 end.
 
 goal  test3: A x ~W(x) => ~E x W(x)
-proof:
+proof
 	[A x ~W(x):
 		[E x W(x):
-			[fresh a W(a);
+			[fresh a W(a):
 				~W(a);
 				F];
 			F];

@@ -22,8 +22,8 @@ let rec get_var_id str =
 
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
-let id = ['B'-'D'] | ['F' - 'Z']  ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-let name = ['a'-'z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let id = ['a'-'z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']* 
+let name = (['B'-'D'] | ['F' - 'Z']) ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let all = 'A' ' '+ id
 let exists = 'E' ' '+ id
 
@@ -35,6 +35,7 @@ rule read =
   | "proof"   { BEGIN_PROOF }
   | "end."    { END }
   | "axioms"  { AXIOMS }
+  | "fresh"   { FRESH }
   | 'T'       { TRUE }
   | 'F'       { FALSE }
   | "/\\"     { AND }

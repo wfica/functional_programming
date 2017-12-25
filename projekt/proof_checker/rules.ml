@@ -3,9 +3,10 @@ open Core.Std
 
 
 
-module Rules :  
+module Rules 
+:  
 sig
-  val inferable: formula ->  formula list -> box list ->  string list -> bool
+  val inferable: formula ->  formula list -> box list ->  term list -> bool
 end 
 =
 struct 
@@ -14,7 +15,7 @@ struct
     | Form(_) | Fresh_Form(_) -> false
     | Fresh(x0) ->  substitute x f ~subs:(Var(x0)) = snd box
 
-  let introduction (goal : formula) (truth : formula list) (boxes : box list) (freshes : string list) = 
+  let introduction (goal : formula) (truth : formula list) (boxes : box list) (terms : term list) = 
     let is_true = List.mem truth in 
     let in_boxes = List.mem boxes in 
     match goal with 
@@ -25,7 +26,7 @@ struct
     | Not(x) -> in_boxes (Form x, Const(false))
     | Iff(x, y) -> is_true (Impl (x, y) ) &&  is_true (Impl(y, x))
     (* TODO: można podstawiać termy a nie tylko zminne - dodać unifikację! *)
-    | Exists(x, f) -> List.exists freshes ~f:(fun fr -> substitute x f ~subs:(Var fr) |> is_true)
+    | Exists(x, f) -> List.exists terms ~f:(fun subs -> substitute x f ~subs |> is_true)
     | All(x, f) -> List.exists boxes ~f:(fun box -> introAll box x f) 
     | Pred(_) -> is_true goal 
 
@@ -37,7 +38,7 @@ struct
       | Fresh_Form(x0, subed) -> substitute x f ~subs:(Var x0) = subed 
 
 
-  let elimination (goal : formula) (truth : formula list) (boxes : box list) (freshes : string list) =
+  let elimination (goal : formula) (truth : formula list) (boxes : box list) (terms : term list) =
     let is_true = List.mem truth in 
     let in_boxes = List.mem boxes in 
     let eliminate formula goal = 
@@ -55,12 +56,12 @@ struct
             | _ -> false)
       | Exists(x, f) -> List.exists boxes ~f:(fun box -> elimExists box x f goal)
       (* TODO: można podstawiać termy a nie tylko zmienne - dodać unifikację lub zmienić dowody*)
-      | All (x, f) -> List.exists freshes ~f:(fun fr -> substitute x f ~subs:(Var fr) = goal)
+      | All (x, f) -> List.exists terms ~f:(fun subs -> substitute x f ~subs = goal)
     in 
     List.exists truth ~f:(fun f -> eliminate f goal)
 
-  let inferable (goal : formula) (truth : formula list) (boxes : box list) (freshes : string list) : bool = 
+  let inferable (goal : formula) (truth : formula list) (boxes : box list) (terms : term list) : bool = 
     List.mem truth goal || 
-    introduction goal truth boxes freshes || 
-    elimination goal truth boxes freshes
+    introduction goal truth boxes terms || 
+    elimination goal truth boxes terms
 end 

@@ -97,7 +97,10 @@ let rec terms_of_proof_item (p : proof_item) =
 and terms_of_proof (Proof(l)) = 
   List.concat_map l ~f:terms_of_proof_item |>
   List.dedup
-  
+
+let terms_of_task (Task(_, goal, proof)) =
+  terms_of_formula goal @ terms_of_proof proof |>
+  List.dedup
 
 (* substitutes subs for x in term *)
 let rec substitute_term ~subs x term  = 

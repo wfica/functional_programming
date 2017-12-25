@@ -24,21 +24,24 @@ let parse_with_error lexbuf =
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
     exit (-1)
 
-let verify index (Task(task_name, goal, proof) as task) known_truth outx =
+let verify index (Task(task_name, goal, proof) as task) known_truth terms outx =
   Out_channel.output_string outx @@ string_of_int index ^ ":" ;
   match is_task_valid task with
   | false -> 
     Out_channel.output_string outx @@ "  Dowód " ^ task_name ^ " błędny - nie dowodzi celu!\n" ; None
   | true -> 
-    if NatDed.proof ~known_truth outx proof 
+    if NatDed.proof ~known_truth outx proof terms 
     then let _ = Out_channel.output_string outx @@ "    Dowód " ^ task_name ^ " poprawny.\n" in Some goal
     else let _ = Out_channel.output_string outx @@ "    Dowód " ^ task_name ^ " błędny!\n" in None
 
 
 
 let solve tasks outFile axioms = 
+  let axioms_terms = terms_of_axioms axioms in 
   let outx = Out_channel.create outFile in 
-  let _ = List.foldi tasks ~f:(fun i acc task -> verify i task acc outx |> append_some ~l:acc  ) ~init:axioms in 
+  let proccess_task i truth task = 
+    verify i task truth (axioms_terms @ terms_of_task task)  outx |> append_some ~l:truth   in 
+  let _ = List.foldi tasks ~init:axioms ~f:proccess_task  in 
   Out_channel.close outx 
 
 let parse_inFile inFile outFile () =

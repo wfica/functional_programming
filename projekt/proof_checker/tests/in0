@@ -76,8 +76,10 @@ goal konstrukcja: (P => R) /\ (Q => R) /\ (P \/ Q) => R
 proof
     [(P => R) /\ (Q => R) /\ (P \/ Q) : 
     (P => R) /\ (Q => R);
-    P => R; 
+    P => R;
+    [P : R]; 
     Q => R; 
+    [Q : R];
     P \/ Q ; 
     R];
     (P => R) /\ (Q => R) /\ (P \/ Q) => R 

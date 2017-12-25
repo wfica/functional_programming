@@ -1,38 +1,49 @@
 open Proof_type
-open Core.Std 
-open Rules 
+open Core.Std
+open Rules
 
-module NatDed :
-sig 
-  val proof : 
-    ?known_truth:Proof_type.formula list ->
+
+module NatDed: 
+sig
+  val proof :
+    ?known_truth: formula list ->
     Core.Std.Out_channel.t ->
-    Proof_type.proof -> bool
-end = 
+    proof -> bool
+end  
+=
 struct
   exception IncorrectProof of int
-  let hypothesis_goal h =
-    match h with 
-    | Hypothesis(_, Proof(proof)) ->  List.last_exn proof |> item_to_formula 
-    | _ -> failwith "cannot get goal of a Formula"
 
 
-  let rec _proof (Proof(l)) known_truth =
-    let is_item_OK i truth item =
-      match item with 
-      | Formula(f) -> 
-        if Rules.inferable f truth then f else raise (IncorrectProof(i))
-      | Hypothesis(assumption, l2) as x-> 
-        if _proof l2 (assumption::truth)
-        then Impl(assumption, hypothesis_goal x) 
+  let rec _proof (Proof(l)) known_truth boxes freshes =
+    let is_item_OK i truth item boxes freshes =
+      match item with
+      | Formula(f) ->
+        if Rules.inferable f truth boxes freshes 
+        then ( f:: truth, boxes, freshes) 
         else raise (IncorrectProof(i))
-    in 
-    let _ = List.foldi l ~init:known_truth ~f:(fun i truth item -> (is_item_OK i truth item)  :: truth )
+      | Hypothesis(assumption, l2) ->
+        match assumption with
+        | Form(assum) ->
+          if _proof l2 (assum::truth) boxes freshes
+          then (truth, hypothesis_to_box item :: boxes , freshes)
+          else raise (IncorrectProof(i))
+        | Fresh(var) ->
+          if _proof l2 truth boxes (var::freshes)
+          then (truth, hypothesis_to_box item :: boxes , freshes)
+          else raise (IncorrectProof(i))
+        | Fresh_Form(var, form) ->
+          if _proof l2 (form::truth) boxes (var::freshes)
+          then (truth, hypothesis_to_box item :: boxes , freshes)
+          else raise (IncorrectProof(i))
+    in
+    let _ = List.foldi l ~init:(known_truth,boxes,freshes)
+        ~f:(fun i (truth, boxes, freshes) item -> is_item_OK i truth item boxes freshes)
     in true
 
   let proof ?(known_truth=[]) outx p  =
-    try _proof p known_truth with 
-      IncorrectProof(msg) -> 
-      Out_channel.output_string outx @@ "  Błąd w dowodzie w linijce numer " ^  string_of_int msg ^ "\n"; 
-      false 
+    try _proof p known_truth [] [] with
+      IncorrectProof(msg) ->
+      Out_channel.output_string outx @@ "  Błąd w dowodzie w linii numer " ^  string_of_int msg ^ "\n";
+      false
 end

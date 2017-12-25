@@ -14,6 +14,7 @@ type formula =
   | Exists of string * formula
 
 type assumption = Form of formula | Fresh of string | Fresh_Form of string * formula
+type box = assumption * formula
 
 type proof_item = Formula of formula | Hypothesis of assumption * proof
 and  proof = Proof of proof_item list
@@ -54,6 +55,45 @@ let rec fv_of_formula formula =
   | Not(f) -> fv_of_formula f
   | And(a, b) | Or(a, b) | Iff(a, b) | Impl(a, b) -> fv_of_formula a @ fv_of_formula b 
   | All(x, f) | Exists(x, f)-> fv_of_formula f |> list_diff [x]
+
+
+let hypothesis_goal h =
+  match h with 
+  | Hypothesis(_, Proof(proof)) ->  List.last_exn proof |> item_to_formula 
+  | _ -> failwith "cannot get a goal of a Formula"
+
+let hypothesis_to_box h  : box= 
+  match h with
+  | Hypothesis(f, _) ->  f, (hypothesis_goal h)
+  | _ -> failwith " cannot get a box out of a Formula"
+
+(* substitutes subs for x in term *)
+let rec substitute_term ~subs x term  = 
+  match term with 
+  | Var(t) -> if t = x then subs else term
+  | Fun(f, l) -> Fun( f, List.map l ~f:(substitute_term x ~subs)) 
+
+let  subs_vaild ~subs x f bound_vars : bool =  
+  true 
+
+(* substitutes subs for x in formula f *)
+let substitute ~subs x f  = 
+  let rec _substitute ~subs x f  = 
+    let sub = _substitute ~subs x in 
+    match f with 
+    | Pred(p, l) -> Pred(p, List.map l ~f:(substitute_term ~subs x ) )
+    | Const(_) -> f
+    | Not(a) -> Not(sub a)
+    | And(a, b) -> And( sub a, sub b )
+    | Or( a, b) -> Or( sub a, sub b)
+    | Iff(a, b) -> Iff(sub a, sub b)
+    | Impl(a, b) -> Impl(sub a, sub b)
+    | All(y, f) -> All(y, sub f)
+    | Exists(y, f) -> All(y, sub f)
+  in 
+  if subs_vaild ~subs x f [] 
+  then _substitute ~subs x f 
+  else failwith "invalid substitute"
 
 
 (* funkcje do wypisywania formuł - pomocnicze, tylko do testowania *)

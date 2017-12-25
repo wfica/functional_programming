@@ -1,3 +1,10 @@
-0:    Dowód prawoExportacji poprawny.
-1:    Dowód tautologia poprawny.
-2:    Dowód axiom poprawny.
+0:  Błąd w dowodzie w linii numer 1
+    Dowód test błędny!
+1:    Dowód test0 poprawny.
+2:  Błąd w dowodzie w linii numer 1
+    Dowód test1 błędny!
+3:    Dowód test2 poprawny.
+4:    Dowód test3 poprawny.
+5:    Dowód test3 poprawny.
+6:    Dowód test4 poprawny.
+7:    Dowód test5 poprawny.

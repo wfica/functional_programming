@@ -1,6 +1,6 @@
 axioms:
-( P /\ Q => R) => P => Q => R
-P 
+( P /\ Q => R) => P => Q => R ;
+P ;
 R
 
 goal prawoExportacji: ( P /\ Q => R) => P => Q => R
@@ -18,5 +18,9 @@ end.
 goal axiom: P \/ Q
 proof
     P \/ Q
+end.
+goal axiom2: R
+proof
+    R
 end.
 

@@ -2,6 +2,25 @@ axioms:
 E x P(x);
 A x A y (P(x) => Q(y))
 
+goal test: E x A y (P(x) => Q(y))
+proof
+	[fresh a:
+		A y (P(a) => Q(y))];
+	E x A y (P(x) => Q(y))
+end.
+
+goal test0: ~A x ~P(x)
+proof
+	[A x ~P(x):
+		[fresh a P(a) :
+			~P(a);
+			F];
+		F];
+	~A x ~P(x)
+end.
+
+
+
 goal test1: A x Q(f(x))
 proof
     [fresh a:
@@ -76,7 +95,7 @@ proof
 					F];
 				~~W(a);
 				W(a)];
-			A x W(a);
+			A x W(x);
 			F];
 		~~E x ~W(x);
 		E x ~W(x)];

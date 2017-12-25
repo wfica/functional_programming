@@ -1,19 +1,21 @@
 axioms:
-E x P ;
-A x A y (P(x) => Q(y))
+E x P(x);
+A x A y (P(x) => Q(y));
+A x A y D (x, y)
 
-goal test1: A x Q(f(x))
+goal test0: ~A x W(x) => E x ~W(x)
 proof
-    A x Q(f(x));
-    [fresh a W(a):
-        W(q);
-        L(p);
-        [fresh b : Q(b)];
-        W(b)];
-    W (q) => S(d(x)) /\  E w P(w);
-        	[fresh b P(b):
-    		A y (P(b) => Q(y));
-    		P(b) => Q(f(a));
-    		Q(f(a))
-    	]
+	[~A x W(x):
+		[~E x ~W(x):
+			[fresh a:
+				[~W(a):
+					E x ~W(x);
+					F];
+				~~W(a);
+				W(a)];
+			A x W(a);
+			F];
+		~~E x ~W(x);
+		E x ~W(x)];
+	~A x W(x) => E x ~W(x)
 end.

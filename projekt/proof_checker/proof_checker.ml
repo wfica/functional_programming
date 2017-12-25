@@ -4,6 +4,7 @@ open Proof_type
 open Natural_deduction
 
 
+
 let print_position outx lexbuf =
   let pos = lexbuf.lex_curr_p in
   fprintf outx "%s:%d:%d" pos.pos_fname
@@ -49,7 +50,7 @@ let parse_inFile inFile outFile () =
   solve tasks outFile axioms
 
 
-(* let _ = parse_inFile "tests/in2" "results/out" ()  *)
+let _ = parse_inFile "tests/in" "results/out" () 
 
 
 

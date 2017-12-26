@@ -70,11 +70,11 @@ let hypothesis_to_box h  : box=
 let rec terms_of_term t = 
   match t with
   | Var(_) -> [t]
-  | Fun(f, l) -> t::List.concat_map l ~f:terms_of_term 
+  | Fun(_, l) -> t::List.concat_map l ~f:terms_of_term 
 
 let rec terms_of_formula f =
   match f with
-  | Pred(p, l) -> List.concat_map l ~f:terms_of_term 
+  | Pred(_, l) -> List.concat_map l ~f:terms_of_term 
   | Const(_) -> []
   | Not(x) -> terms_of_formula x
   | And(a, b)| Or(a, b) | Impl(a, b) | Iff(a,b) -> terms_of_formula a @ terms_of_formula b
@@ -108,8 +108,8 @@ let rec substitute_term ~subs x term  =
   | Var(t) -> if t = x then subs else term
   | Fun(f, l) -> Fun( f, List.map l ~f:(substitute_term x ~subs)) 
 
-let  subs_vaild ~subs x f bound_vars : bool =  
-  true 
+(* let  subs_vaild ~subs x f bound_vars : bool =  
+  true  *)
 
 (* substitutes subs for x in formula f *)
 let substitute ~subs x f  = 
@@ -126,9 +126,10 @@ let substitute ~subs x f  =
     | All(y, f) -> All(y, sub f)
     | Exists(y, f) -> All(y, sub f)
   in 
-  if subs_vaild ~subs x f [] 
+  (* if subs_vaild ~subs x f [] 
   then _substitute ~subs x f 
-  else failwith "invalid substitute"
+  else failwith "invalid substitute" *)
+  _substitute ~subs x f 
 
 
 (* funkcje do wypisywania formuł - pomocnicze, tylko do testowania *)

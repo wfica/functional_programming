@@ -2,7 +2,7 @@ axioms:
 E x P(x);
 A x A y (P(x) => Q(y))
 
-goal test: E x A y (P(x) => Q(y))
+goal test6: E x A y (P(x) => Q(y))
 proof
 	[fresh a:
 		A y (P(a) => Q(y))];

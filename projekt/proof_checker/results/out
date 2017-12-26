@@ -1,2 +1,8 @@
-0:  Błąd w dowodzie w linii numer 2
-    Dowód test0 błędny!
+0:    Dowód test0 poprawny.
+1:    Dowód test1 poprawny.
+2:    Dowód test2 poprawny.
+3:    Dowód test3 poprawny.
+4:    Dowód test3 poprawny.
+5:    Dowód test4 poprawny.
+6:    Dowód test5 poprawny.
+7:    Dowód test6 poprawny.

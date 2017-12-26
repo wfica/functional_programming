@@ -44,7 +44,7 @@ struct
     in true
 
   let proof ?(known_truth=[]) outx p terms  =
-    try _proof p known_truth [] terms with
+    try _proof p known_truth [] (List.dedup terms) with
       IncorrectProof(msg) ->
       Out_channel.output_string outx @@ "  Błąd w dowodzie w linii numer " ^  string_of_int msg ^ "\n";
       false

@@ -1,8 +1,6 @@
 open Proof_type
 open Core.Std
 
-
-
 module Rules 
 :  
 sig
@@ -25,8 +23,9 @@ struct
     | Const(x) -> x 
     | Not(x) -> in_boxes (Form x, Const(false))
     | Iff(x, y) -> is_true (Impl (x, y) ) &&  is_true (Impl(y, x))
-    (* TODO: można podstawiać termy a nie tylko zminne - dodać unifikację! *)
-    | Exists(x, f) -> List.exists terms ~f:(fun subs -> substitute x f ~subs |> is_true)
+    | Exists(x, f) -> List.exists terms ~f:(fun subs ->
+      let wynik =  substitute x f ~subs in 
+      is_true wynik )
     | All(x, f) -> List.exists boxes ~f:(fun box -> introAll box x f) 
     | Pred(_) -> is_true goal 
 
@@ -55,7 +54,6 @@ struct
             | Not(y) -> y = goal 
             | _ -> false)
       | Exists(x, f) -> List.exists boxes ~f:(fun box -> elimExists box x f goal)
-      (* TODO: można podstawiać termy a nie tylko zmienne - dodać unifikację lub zmienić dowody*)
       | All (x, f) -> List.exists terms ~f:(fun subs -> substitute x f ~subs = goal)
     in 
     List.exists truth ~f:(fun f -> eliminate f goal)

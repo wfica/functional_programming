@@ -5,20 +5,17 @@
 4:    Dowód dunsSzkot poprawny.
 5:    Dowód simpifikacja1 poprawny.
 6:    Dowód simplifikacja2 poprawny.
-7:  Błąd w dowodzie w linii numer 0
-    Dowód simplifikacja3 błędny!
+7:    Dowód simplifikacja3 poprawny.
 8:    Dowód prawoExportacji poprawny.
 9:    Dowód prawoImportacji poprawny.
 10:    Dowód prawoSprzecznosci poprawny.
 11:    Dowód redukcjaDoAbsurdu poprawny.
-12:  Błąd w dowodzie w linii numer 4
-    Dowód konstrukcja błędny!
+12:    Dowód konstrukcja poprawny.
 13:    Dowód wylaczonySrodek poprawny.
 14:    Dowód kompozycja poprawny.
 15:    Dowód kompozycja2 poprawny.
 16:    Dowód sylogizmHipo poprawny.
 17:    Dowód peirce poprawny.
 18:    Dowód clavius poprawny.
-19:  Błąd w dowodzie w linii numer 0
-    Dowód tozsamosc błędny!
+19:    Dowód tozsamosc poprawny.
 20:    Dowód deMorgan poprawny.

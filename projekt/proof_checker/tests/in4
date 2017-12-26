@@ -19,3 +19,10 @@ proof
 		E x ~W(x)];
 	~A x W(x) => E x ~W(x)
 end.
+
+goal test1: E x A y (P(x) => Q(y))
+proof
+	[fresh a:
+		A y (P(a) => Q(y))];
+	E x A y (P(x) => Q(y))
+end.

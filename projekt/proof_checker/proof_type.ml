@@ -41,12 +41,12 @@ let rec fv_of_term term =
   | Var(x) -> [x]
   | Fun(_, l) -> List.concat_map  l ~f:(fun t -> fv_of_term t)
 
-let rec list_diff a b =
+let rec list_diff (a : string list)  ~without =
   match a with
   | [] -> []
   | hd::tl -> 
-    let rest = list_diff tl b in 
-    if List.mem b hd then rest else hd::rest
+    let rest = list_diff tl ~without in 
+    if List.mem without hd then rest else hd::rest
 
 let rec fv_of_formula formula =
   match formula with
@@ -54,7 +54,13 @@ let rec fv_of_formula formula =
   | Const(_) -> []
   | Not(f) -> fv_of_formula f
   | And(a, b) | Or(a, b) | Iff(a, b) | Impl(a, b) -> fv_of_formula a @ fv_of_formula b 
-  | All(x, f) | Exists(x, f)-> fv_of_formula f |> list_diff [x]
+  | All(x, f) | Exists(x, f)-> fv_of_formula f |> list_diff ~without:[x]
+
+
+let rec bv_of_formula formula =
+   match formula with
+   | All(x, f) | Exists(x, f) -> x :: bv_of_formula f |> List.dedup
+   | _ -> []
 
 
 let hypothesis_goal h =
@@ -108,11 +114,8 @@ let rec substitute_term ~subs x term  =
   | Var(t) -> if t = x then subs else term
   | Fun(f, l) -> Fun( f, List.map l ~f:(substitute_term x ~subs)) 
 
-(* let  subs_vaild ~subs x f bound_vars : bool =  
-  true  *)
-
 (* substitutes subs for x in formula f *)
-let substitute ~subs x f  = 
+let substitute_exn ~subs x f  = 
   let rec _substitute ~subs x f  = 
     let sub = _substitute ~subs x in 
     match f with 
@@ -124,13 +127,25 @@ let substitute ~subs x f  =
     | Iff(a, b) -> Iff(sub a, sub b)
     | Impl(a, b) -> Impl(sub a, sub b)
     | All(y, f) -> All(y, sub f)
-    | Exists(y, f) -> All(y, sub f)
+    | Exists(y, f) -> Exists(y, sub f)
   in 
-  (* if subs_vaild ~subs x f [] 
-  then _substitute ~subs x f 
-  else failwith "invalid substitute" *)
-  _substitute ~subs x f 
+  let _valid ~subs x f : formula = 
+    let res = _substitute ~subs x f in 
+    let bv_res  = bv_of_formula res in
+    let fv_term = fv_of_term subs  in 
+    if List.for_all fv_term ~f:(fun v -> List.mem bv_res v = false )
+    then res else failwith "invalid substitute"
+    
 
+  in 
+  _valid ~subs x f 
+
+
+let substitute ~subs x f =
+  try 
+    let res = substitute_exn ~subs x f in 
+    Some res 
+  with _ -> None
 
 (* funkcje do wypisywania formuł - pomocnicze, tylko do testowania *)
 let rec print_term t =

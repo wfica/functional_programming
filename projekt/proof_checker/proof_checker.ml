@@ -53,7 +53,8 @@ let parse_inFile inFile outFile () =
   solve tasks outFile axioms
 
 
-(* let _ = parse_inFile "tests/in" "results/out" ()  *)
+  
+let _ = parse_inFile "tests/in" "results/out" () 
 
 
 

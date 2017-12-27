@@ -26,3 +26,17 @@ proof
 		A y (P(a) => Q(y))];
 	E x A y (P(x) => Q(y))
 end.
+
+goal zle_podstawienie: ( A x E y R(x, y) ) => ( E y R(y, y) )
+proof
+	[A x E y R(x, y):
+		[~E y R(y, y):
+			[fresh y :
+				E y R(y, y);
+				F];
+			A s F;
+			F];
+		~~E y R(y, y);
+		E y R(y, y)];
+	( A x E y R(x, y) ) => ( E y R(y, y) )
+end.

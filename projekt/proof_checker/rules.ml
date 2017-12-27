@@ -1,17 +1,18 @@
 open Proof_type
 open Core.Std
 
+
 module Rules 
-:  
-sig
-  val inferable: formula ->  formula list -> box list ->  term list -> bool
-end 
+  :  
+  sig
+    val inferable: formula ->  formula list -> box list ->  term list -> bool
+  end 
 =
 struct 
   let introAll (box : box) x f = 
     match fst box with
     | Form(_) | Fresh_Form(_) -> false
-    | Fresh(x0) ->  substitute x f ~subs:(Var(x0)) = snd box
+    | Fresh(x0) ->  substitute x f ~subs:(Var(x0)) = Some (snd box)
 
   let introduction (goal : formula) (truth : formula list) (boxes : box list) (terms : term list) = 
     let is_true = List.mem truth in 
@@ -23,9 +24,10 @@ struct
     | Const(x) -> x 
     | Not(x) -> in_boxes (Form x, Const(false))
     | Iff(x, y) -> is_true (Impl (x, y) ) &&  is_true (Impl(y, x))
-    | Exists(x, f) -> List.exists terms ~f:(fun subs ->
-      let wynik =  substitute x f ~subs in 
-      is_true wynik )
+    | Exists(x, f) -> List.exists terms 
+                        ~f:(fun subs -> match substitute x f ~subs with 
+                            | Some(res) -> res |> is_true 
+                            | None -> false )
     | All(x, f) -> List.exists boxes ~f:(fun box -> introAll box x f) 
     | Pred(_) -> is_true goal 
 
@@ -34,7 +36,7 @@ struct
     else 
       match fst box with
       | Form(_) | Fresh(_) -> false
-      | Fresh_Form(x0, subed) -> substitute x f ~subs:(Var x0) = subed 
+      | Fresh_Form(x0, subed) -> substitute x f ~subs:(Var x0) = Some subed 
 
 
   let elimination (goal : formula) (truth : formula list) (boxes : box list) (terms : term list) =
@@ -54,7 +56,7 @@ struct
             | Not(y) -> y = goal 
             | _ -> false)
       | Exists(x, f) -> List.exists boxes ~f:(fun box -> elimExists box x f goal)
-      | All (x, f) -> List.exists terms ~f:(fun subs -> substitute x f ~subs = goal)
+      | All (x, f) -> List.exists terms ~f:(fun subs ->  substitute x f ~subs = Some goal )
     in 
     List.exists truth ~f:(fun f -> eliminate f goal)
 

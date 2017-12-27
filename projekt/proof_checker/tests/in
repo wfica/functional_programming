@@ -4,7 +4,13 @@ A x A y (P(x) => Q(y))
 
 goal test6: E x A y (P(x) => Q(y))
 proof
-	[fresh a:
-		A y (P(a) => Q(y))];
+	[ ~E x A y (P(x) => Q(y)) :
+		[fresh a:
+			A y (P(a) => Q(y));
+			E x A y (P(x) => Q(y));
+			F];
+		A x F;
+		F];
+	~~E x A y (P(x) => Q(y));
 	E x A y (P(x) => Q(y))
 end.

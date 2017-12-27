@@ -107,3 +107,18 @@ proof
 	~~E x A y (P(x) => Q(y));
 	E x A y (P(x) => Q(y))
 end.
+
+goal test7: A x W(x) => E y W(f(y,y))
+proof
+	[A x W(x):
+		[~E y W(f(y,y)):
+			[fresh a:
+				W(f(a,a));
+				E y W(f(y,y));
+				F];
+			A x F;
+			F];
+		~~E y W(f(y,y));
+		E y W(f(y,y))];
+	A x W(x) => E y W(f(y,y))	
+end.

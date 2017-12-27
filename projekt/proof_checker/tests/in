@@ -2,15 +2,17 @@ axioms:
 E x P(x);
 A x A y (P(x) => Q(y))
 
-goal test6: E x A y (P(x) => Q(y))
+goal test: A x W(x) => E y W(f(y,y))
 proof
-	[ ~E x A y (P(x) => Q(y)) :
-		[fresh a:
-			A y (P(a) => Q(y));
-			E x A y (P(x) => Q(y));
+	[A x W(x):
+		[~E y W(f(y,y)):
+			[fresh a:
+				W(f(a,a));
+				E y W(f(y,y));
+				F];
+			A x F;
 			F];
-		A x F;
-		F];
-	~~E x A y (P(x) => Q(y));
-	E x A y (P(x) => Q(y))
+		~~E y W(f(y,y));
+		E y W(f(y,y))];
+	A x W(x) => E y W(f(y,y))	
 end.

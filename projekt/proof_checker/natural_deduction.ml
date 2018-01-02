@@ -19,6 +19,12 @@ struct
   let rec _proof line_number (Proof(l)) known_truth boxes terms =
     let is_item_OK ln truth item boxes terms =
       match item with
+      | Prove_it(f) -> 
+        (match Proof_assistant.infer f truth with 
+         | Some(l) -> 
+           List.iter l ~f:(fun f -> print_formula f; print_string ", ") ; print_newline ()  ;   
+           ( f:: truth, boxes) 
+         | None -> raise (IncorrectProof(ln)))
       | Formula(f) ->
         if Rules.inferable f truth boxes  terms
         then ( f:: truth, boxes) 
@@ -26,11 +32,11 @@ struct
       | Hypothesis(assumption, l2) ->
         match assumption with
         | Form(form) | Fresh_Form(_, form) ->
-          if _proof ln l2 (form::truth) boxes terms
+          if _proof (ln+1) l2 (form::truth) boxes terms
           then (truth, hypothesis_to_box item :: boxes )
           else raise (IncorrectProof(ln))
         | Fresh(_) ->
-          if _proof ln l2 truth boxes terms
+          if _proof (ln+1) l2 truth boxes terms
           then (truth, hypothesis_to_box item :: boxes )
           else raise (IncorrectProof(ln))
     in
@@ -44,3 +50,4 @@ struct
       Out_channel.output_string outx @@ "  Błąd w dowodzie w linii numer " ^  string_of_int line_number ^ "\n";
       false
 end
+

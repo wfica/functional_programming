@@ -16,7 +16,7 @@ type formula =
 type assumption = Form of formula | Fresh of string | Fresh_Form of string * formula
 type box = assumption * formula
 
-type proof_item = Formula of formula | Hypothesis of assumption * proof
+type proof_item = Formula of formula | Hypothesis of assumption * proof | Prove_it of formula
 and  proof = Proof of proof_item list
 
 type task = Task of string * formula * proof
@@ -58,9 +58,9 @@ let rec fv_of_formula formula =
 
 
 let rec bv_of_formula formula =
-   match formula with
-   | All(x, f) | Exists(x, f) -> x :: bv_of_formula f |> List.dedup
-   | _ -> []
+  match formula with
+  | All(x, f) | Exists(x, f) -> x :: bv_of_formula f |> List.dedup
+  | _ -> []
 
 
 let hypothesis_goal h =
@@ -98,7 +98,7 @@ let terms_of_assumption (a : assumption)=
 
 let rec terms_of_proof_item (p : proof_item) = 
   match p with
-  | Formula(f) -> terms_of_formula f
+  | Formula(f) | Prove_it(f) -> terms_of_formula f
   | Hypothesis(assumption, proof) -> terms_of_assumption assumption @ terms_of_proof proof
 and terms_of_proof (Proof(l)) = 
   List.concat_map l ~f:terms_of_proof_item |>
@@ -135,7 +135,7 @@ let substitute_exn ~subs x f  =
     let fv_term = fv_of_term subs  in 
     if List.for_all fv_term ~f:(fun v -> List.mem bv_res v = false )
     then res else failwith "invalid substitute"
-    
+
 
   in 
   _valid ~subs x f 
@@ -156,7 +156,7 @@ let rec print_term t =
 
 let rec print_formula  f = 
   match f with 
-  | Pred(p, l) -> printf "%s(" p; List.iter l ~f:print_term ; printf ")" 
+  | Pred(p, l) -> if l = [] then  printf "%s" p  else  (printf "%s(" p; List.iter l ~f:print_term ; printf ")" )
   | Const(true) -> printf "T" 
   | Const(false) -> printf "F" 
   | Not(f) -> printf "~(" ;  print_formula  f ; printf ")"
@@ -177,6 +177,7 @@ let rec print_proof (Proof(proof)) =
   let  print_proof_item item =
     match item with 
     | Formula(f) -> print_formula f 
+    | Prove_it(f) -> printf "!{ "; print_formula f ; printf " }!" 
     | Hypothesis(a, p) ->  printf "[ "; print_assumption a ; printf " : "; print_proof p ; printf " ]" 
   in 
   List.iter proof ~f:(fun item -> print_proof_item item; printf ";\n" )

@@ -54,7 +54,7 @@ let parse_inFile inFile outFile () =
 
 
   
-let _ = parse_inFile "tests/in" "results/out" () 
+(* let _ = parse_inFile "tests/in" "results/out" ()  *)
 
 
 

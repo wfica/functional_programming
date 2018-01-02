@@ -1,18 +1,17 @@
 axioms:
-E x P(x);
-A x A y (P(x) => Q(y))
+Q => W;
+Z;
+Z => Q;
+W => H
 
-goal test: A x W(x) => E y W(f(y,y))
+goal test0: W
 proof
-	[A x W(x):
-		[~E y W(f(y,y)):
-			[fresh a:
-				W(f(a,a));
-				E y W(f(y,y));
-				F];
-			A x F;
-			F];
-		~~E y W(f(y,y));
-		E y W(f(y,y))];
-	A x W(x) => E y W(f(y,y))	
+    prove_it { W };
+    W
+end.
+
+goal test0: H
+proof
+    prove_it { H };
+    H
 end.

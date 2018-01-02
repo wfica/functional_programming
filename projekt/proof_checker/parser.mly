@@ -28,6 +28,10 @@ open Proof_type
 %token COMMA
 %token FRESH
 
+%token CURLY_LEFT
+%token CURLY_RIGHT
+%token PROVE_IT
+
 %left IFF  /* lowest precedence  */
 %right IMPL
 %left OR
@@ -77,8 +81,9 @@ formula:
 proof_item:
   | LEFT_SQUARE_BRACK; a = assumption; COLON ;
     pil = proof;
-    RIGHT_SQUARE_BRACK                      { Hypothesis(a, pil) }
-  | f = formula                             { Formula(f) }
+    RIGHT_SQUARE_BRACK                             { Hypothesis(a, pil) }
+  | f = formula                                    { Formula(f) }
+  | PROVE_IT; CURLY_LEFT; f = formula; CURLY_RIGHT { Prove_it(f) }
 
 
 proof:

@@ -147,49 +147,5 @@ let substitute ~subs x f =
     Some res 
   with _ -> None
 
-(* funkcje do wypisywania formuł - pomocnicze, tylko do testowania *)
-let rec print_term t =
-  match t with
-  | Var(x) -> printf "%s" x 
-  | Fun(f, l) -> printf "%s(" f ; List.iter l ~f:print_term ; printf ")"
-
-
-let rec print_formula  f = 
-  match f with 
-  | Pred(p, l) -> if l = [] then  printf "%s" p  else  (printf "%s(" p; List.iter l ~f:print_term ; printf ")" )
-  | Const(true) -> printf "T" 
-  | Const(false) -> printf "F" 
-  | Not(f) -> printf "~(" ;  print_formula  f ; printf ")"
-  | And(f1, f2) -> printf "AND("; print_formula  f1 ; printf ", " ; print_formula  f2 ; printf ") "
-  | Or(f1, f2) -> printf "Or("; print_formula  f1 ; printf ", " ; print_formula  f2 ; printf ") "
-  | Impl(f1, f2) -> printf "Impl("; print_formula  f1 ; printf ", " ; print_formula  f2 ; printf ") "
-  | Iff(f1, f2) -> printf "Iff("; print_formula  f1 ; printf ", " ; print_formula  f2 ; printf ") "
-  | All(x, f) -> printf "A %s " x ; print_formula f 
-  | Exists(x, f) -> printf "E %s " x ; print_formula f 
-
-let print_assumption a =
-  match a with 
-  | Form(f) -> print_formula f
-  | Fresh(var) -> printf "fresh %s " var
-  | Fresh_Form (var, f) -> printf "fresh %s " var ; print_formula f 
-
-let rec print_proof (Proof(proof)) =
-  let  print_proof_item item =
-    match item with 
-    | Formula(f) -> print_formula f 
-    | Prove_it(f) -> printf "!{ "; print_formula f ; printf " }!" 
-    | Hypothesis(a, p) ->  printf "[ "; print_assumption a ; printf " : "; print_proof p ; printf " ]" 
-  in 
-  List.iter proof ~f:(fun item -> print_proof_item item; printf ";\n" )
-
-let rec output_task_list  task_list = 
-  match task_list with 
-  | [] -> () 
-  | (Task(id, target, proof) )::tl ->   
-    printf "%s\n" id ;
-    print_formula  target ;
-    printf "\n" ; 
-    print_proof  proof ; printf "------------\n";
-    output_task_list  tl
 
 

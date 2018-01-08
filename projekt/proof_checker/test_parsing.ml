@@ -20,9 +20,9 @@ let parse_and_print lexbuf =
   | [], []-> ()
   | _ as l -> 
   printf "axioms:\n" ;
-  List.iter (fst l ) ~f:( fun f -> Proof_type.print_formula f  ; printf "\n" ) ;
+  List.iter (fst l ) ~f:( fun f -> Printing.print_formula f  ; printf "\n" ) ;
   printf "\ntasks:\n " ; 
-  Proof_type.output_task_list (snd l ) 
+  Printing.output_task_list (snd l ) 
 
 
 let loop filename () =
@@ -37,3 +37,4 @@ let () =
     Command.Spec.(empty +> anon ("filename" %: file))
     loop 
   |> Command.run
+

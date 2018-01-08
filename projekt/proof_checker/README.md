@@ -39,4 +39,5 @@ Składnia jak w specyfikacji zadania, ale:
 | tests/in3 | test z błędnymi dowodami   | logika I rzędu        |
 | tests/in4 | test z poprawnymi dowodami | logika I rzędu        |
 | tests/in5 | test z poprawnymi dowodami | ```prove_it {}```     |
+| tests/in6 | test z błędnymi dowodami   | ```prove_it {}```     |
 

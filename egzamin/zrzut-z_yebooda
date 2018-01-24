@@ -1,0 +1,176 @@
+
+Egzamin z programowania funkcyjnego 31.01.2012 
+Oprócz zapisanych zadań były też: 
+a) Podane poprawne definicje funkcji: co zwróci podane wywołanie funkcji? 
+b) Podane pary funkcji: czy fucnkje są równoważne, jeśli nie to wskaż czym się różnią i podaj argument, na którym zwrócą różne wyniki? 
+c) Typ dla drzew binarnych, przykładowe drzewo i funkcja na drzewie: narysuj podane drzewo, co zwróci funkcja zaaplikowana do przykładowego drzewa? 
+
+Numeracja poniższych zadań jest inna niż na egzaminie. Znak (?) przy zadaniu oznacza, że nie miałem pewności co do treści/pytań. 
+Zadanie. 1. 
+let a = 5;; 
+let bref = ref a;; 
+let cref = bref;; 
+let a = 3;; 
+let f x = !bref + a;; 
+let a = 1;; 
+bref:=2;; 
+cref:=3;; 
+
+Co otrzymamy wywołując: 
+a) a;; 
+b) !bref;; 
+c) !cref;; 
+d) f 0;; 
+
+Zadanie 2. (?) 
+Które funkcje rzucą ostrzeżenie: pattern-matching is not exhaustive? 
+type foo = A | B of int | C of int list;; 
+a) let f1 x = match x with y -> 1;; 
+b) let f2 x = match x with A -> 0 | B y -> 1 | C y -> 2;; 
+c) let f3 x = match x with A -> 0 | B y -> 1 | C (h::t) -> 2;; 
+d) let f3 x = match x with A -> 0 | _ -> 2 | B _ -> 1;; 
+
+Zadanie 3. 
+1)Podaj najogólniejszy typ funkcji fold_left. 
+2)Jaki wynik zwróci następujące wywołanie: 
+fold_left (fun x y -> if y mod 2 = 0 then y::x else x) [] [3;4;5;6] 
+Przedstaw jak obliczany jest wynik. 
+
+Zadanie 4. 
+Podaj typ: 
+f z y x = z (y x) 
+
+Zadanie 5.(Tutaj sporo nie pamiętam - jakieś braki w definicji, a zadania a)b)c)d) był podobne :) - ale może komuś łatwiej będzie odtworzyć albo poprawić to zadanie) 
+module type S = 
+sig 
+type t 
+type s = float 
+val f: s->t 
+end 
+
+module M1 = 
+struct 
+type t 
+type s 
+let f x = truncate x 
+let x = 2.4 
+end 
+
+module F(M:S with type t = int):sig type t type s=float val f: s->t end = 
+struct 
+type t = M.t 
+type s = M.s 
+let f = M.f 
+end 
+
+let M2 = F(M1);; 
+
+Co zwrócą następujące wywołania 
+a) 
+M1.f (M1.f M1.x);; 
+i)int 2 
+ii)Błąd typu 
+iii) ... 
+iv) ... 
+b) (M1.f 5);; 
+c) (M2.f 3.0) + 2 
+d) (M2.f 5.0) 
+
+Zadanie 6. 
+class Monad m where 
+(>>=) :: m a -> (a -> m b) -> m b 
+(>>) :: m a -> m b -> m b 
+return :: a -> m a 
+fail :: String -> m a 
+
+m>>k = m >>= \ _ -> k 
+fail s = error s 
+
+1) Jakiego rodzaju (ang. kind) jest m? 
+2) Podaj prawe strony aksjomatów monad: 
+a) return a>>=k = 
+b) m >>= return = 
+c) m >>=(\x -> k x >>= h) = 
+d) m >> (k >> h) = 
+
+Zadanie 7. (?) 
+Co wypisze interpreter racket'a: 
+'(1 (+ 1 2)) 
+cons 1 (+ 1 2) 
+quasiquote(1 (+ 1 2)) 
+(list 'a 'b 'c) 
+(cons 'a 'b) 
+
+Zadanie 8. 
+Narysuj graf \beta-redukcji wyrażenia WW, W = (\x.(\y.yy)x) 
+
+Zadanie 9. 
+Wymień postacie normalne (\etaNF, \betaNF, HNF, WHNF, RNF), podaj definicje i przykłady. 
+
+#########################################
+
+Masz istotną literówkę, w zdaniu z Racketem było (quasiquote `(1 (+ 1 2))) czyli quasiquote(1 (unquote(+ 1 2))) 
+
+
+
+##########################################################
+
+
+
+to co ja pamiętam z egzaminu, który pisałam: 
+3 zadania były takie: 
+
+1) zdefiniować wszystkie znane Ci postaci normalne i podać przykłady (to z rachunku lambda, było na slajdach) 
+
+2) narysować graf beta redukcji dla termu WW, 
+gdzie 
+W = lambda x . (lambda y . yy) x 
+
+3) podaj i uzasadnij typ wyrażenia 
+lambda x y z . (xz)(yz) 
+
+one były za sporo punktów 
+
+było też mnóstwo testowych zadanek 
+na znajomość składni i działania OCamla + systemu klas 
+(trzeba dobrze przeanalizować wykład z obiektowości 
+zwiazany z tym ":.") 
+
+było zadanie, w którym były podane 4 podobne klasy, podać które ich kombinacje są w relacji podklasowania 
+
+Były również zadania, w których trzeba było prześledzić czy jakaś funkcja się obliczy (i do jakiego wyniku), czy zwróci wyjątek. 
+Było też zadanie, w którym trzeba było podać typ funkcji fold_left oraz pokazać (poprzez równości), jak wygląda wyznaczenie wartości jakiegoś wyrażenia z tym fold'em. 
+
+#################################
+
+Zadania na egzaminie były te same! ZS chyba w ogóle ich nie zmienia. Zapiszę jutro część tych zadań w tym poście, póki coś pamiętam i będzie dla przyszłych pokoleń :-) 
+
+Edit: 
+Jak obiecałem. 
+Pierwsze zadania było takie, że dane były cztery proste programiki napisane w OCamlu. Trzebało napisać, czy się zapętlą, zwrócą błąd typu, czy policzą dobry wynik (dla podanej wartości) i jakiego typu jest wynik. 
+
+Jedno zadanko z którym miałem problemy wyglądało jakoś tak: 
+type t of A of int | B of int | C 
+let s = A 5 
+let t = A 10 
+let f x = match x with 
+A s -> s + 10 
+B t -> t + 4 
+t -> 9 
+Co zwróci (jeśli się skompiluje) taki program dla A 10. 
+
+Było zadanie z fold_rightem. Była definicja jego i trzeba było podać jaki jest jego typ oraz jaką wartość zwróci dla podanego wywołania 
+
+Było zadanie z drzewem binarnym leniwym. Była definicja i pewien przykład drzewa binarnego - trzeba było narysować jak wygląda. Była też funkcja - trzebało powiedzieć jaką wartość zwróci dla tego drzewa (15 :D) 
+
+3 zadania z lambdy (na 15 punktów). Narysować drzewo wywodu xyz.(xz)(yz). Zdefiniować wszystkie znane Ci postaci normalne i podać przykłady. narysować graf beta redukcji dla termu ZZ, Z = x.(y.yy)x 
+
+Było jedno zadanie z funktorami. Niestety nie zapamiętałem treści. Było za 12 punktów (strzelałem :P) 
+
+Podtypowanie - 5 klas i kilka pytań - co jest podtypem czego. Dodatkowo trzeba było podać pełny(!) typ wybranych klas. 
+
+Były matche, trzeba było podać które z nich zwrócą warningi. 
+
+Były pary funkcji. Było pytanie czy są te funkcje równoważne. Jeśli nie to podać kontrprzykład dla nich. 
+
+Jak przypomnę sobie jakieś zadanie jeszcze to napiszę 
